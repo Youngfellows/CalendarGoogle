@@ -1,0 +1,10 @@
+rootProject.name = 'Calendar'
+include ':app'
+include ':Calendar'
+include ':chips'
+include ':colorpicker'
+include ':common'
+include ':calendar_common'
+include ':datetimepicker'
+include ':timezonepicker'
+
