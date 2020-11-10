@@ -51,7 +51,7 @@ import java.util.Map.Entry;
 import java.util.WeakHashMap;
 
 public class CalendarController {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String TAG = "CalendarController";
 
     public static final String EVENT_EDIT_ON_LAUNCH = "editMode";

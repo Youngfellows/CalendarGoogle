@@ -86,7 +86,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         OnSharedPreferenceChangeListener, SearchView.OnQueryTextListener, ActionBar.TabListener,
         ActionBar.OnNavigationListener, OnSuggestionListener {
     private static final String TAG = "AllInOneActivity";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String EVENT_INFO_FRAGMENT_TAG = "EventInfoFragment";
     private static final String BUNDLE_KEY_RESTORE_TIME = "key_restore_time";
     private static final String BUNDLE_KEY_EVENT_ID = "key_event_id";
@@ -198,6 +198,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         @Override
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
             mCheckForAccounts = false;
+            Log.d(TAG, "onQueryComplete:: cursor:" + cursor + ",cursor count:" + cursor.getCount());
             try {
                 // If the query didn't return a cursor for some reason return
                 if (cursor == null || cursor.getCount() > 0 || isFinishing()) {
@@ -208,7 +209,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                     cursor.close();
                 }
             }
-
+            Log.d(TAG, "onQueryComplete:: addAccount ...");
             Bundle options = new Bundle();
             options.putCharSequence("introMessage",
                     getResources().getString(R.string.create_an_account_desc));
@@ -226,7 +227,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                             try {
                                 Bundle result = future.getResult();
                                 boolean setupSkipped = result.getBoolean("setupSkipped");
-
+                                Log.d(TAG, "run:: addAccount,setupSkipped:" + setupSkipped);
                                 if (setupSkipped) {
                                     Utils.setSharedPreference(AllInOneActivity.this,
                                             GeneralPreferences.KEY_SKIP_SETUP, true);
@@ -308,13 +309,15 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         super.onCreate(icicle);
 
         if (icicle != null && icicle.containsKey(BUNDLE_KEY_CHECK_ACCOUNTS)) {
+            Log.d(TAG, "onCreate: BUNDLE_KEY_CHECK_ACCOUNTS ... ");
             mCheckForAccounts = icicle.getBoolean(BUNDLE_KEY_CHECK_ACCOUNTS);
         }
+        Log.d(TAG, "onCreate:: mCheckForAccounts: " + mCheckForAccounts);
         // Launch add google account if this is first time and there are no
         // accounts yet
         if (mCheckForAccounts
                 && !Utils.getSharedPreference(this, GeneralPreferences.KEY_SKIP_SETUP, false)) {
-
+            Log.d(TAG, "onCreate:: Launch add google account if this is first time and there are no account yes ");
             mHandler = new QueryHandler(this.getContentResolver());
             mHandler.startQuery(0, null, Calendars.CONTENT_URI, new String[] {
                 Calendars._ID
@@ -329,11 +332,13 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         long timeMillis = -1;
         int viewType = -1;
         final Intent intent = getIntent();
+        Log.d(TAG, "onCreate:: icicle:" + icicle);
         if (icicle != null) {
             timeMillis = icicle.getLong(BUNDLE_KEY_RESTORE_TIME);
             viewType = icicle.getInt(BUNDLE_KEY_RESTORE_VIEW, -1);
         } else {
             String action = intent.getAction();
+            Log.d(TAG, "onCreate:: action:" + action);
             if (Intent.ACTION_VIEW.equals(action)) {
                 // Open EventInfo later
                 timeMillis = parseViewAction(intent);
