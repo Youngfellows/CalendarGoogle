@@ -209,6 +209,9 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                     cursor.close();
                 }
             }
+
+            // TODO: 2020/11/11 没有账户,可以添加一个默认的账户,不添加google账户,其实就是往数据库插入一个账户
+            
             Log.d(TAG, "onQueryComplete:: addAccount ...");
             Bundle options = new Bundle();
             options.putCharSequence("introMessage",
@@ -330,7 +333,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
         // Get time from intent or icicle
         long timeMillis = -1;
-        int viewType = -1;
+        int viewType = -1;//视图类型
         final Intent intent = getIntent();
         Log.d(TAG, "onCreate:: icicle:" + icicle);
         if (icicle != null) {
@@ -353,6 +356,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             viewType = Utils.getViewTypeFromIntentAndSharedPref(this);
         }
         mTimeZone = Utils.getTimeZone(this, mHomeTimeUpdater);
+        Log.d(TAG, "onCreate:: mTimeZone:" + mTimeZone);
         Time t = new Time(mTimeZone);
         t.set(timeMillis);
 
@@ -410,6 +414,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             mDateRange = (TextView) getLayoutInflater().inflate(R.layout.date_range_title, null);
         }
 
+        Log.d(TAG, "onCreate:: configureActionBar,viewType:" + viewType);
         // configureActionBar auto-selects the first tab you add, so we need to
         // call it before we set up our own fragments to make sure it doesn't
         // overwrite us

@@ -39,7 +39,7 @@ import java.util.Locale;
  * This class is expected to move into the app framework eventually.
  */
 public class CalendarUtils {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String TAG = "CalendarUtils";
 
     /**
@@ -93,6 +93,8 @@ public class CalendarUtils {
             @Override
             protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
                 synchronized (mTZCallbacks) {
+                    Log.d(TAG, "onQueryComplete:: cursor:" + cursor);
+
                     if (cursor == null) {
                         mTZQueryInProgress = false;
                         mFirstTZRequest = true;
@@ -103,9 +105,11 @@ public class CalendarUtils {
                     // Check the values in the db
                     int keyColumn = cursor.getColumnIndexOrThrow(CalendarCache.KEY);
                     int valueColumn = cursor.getColumnIndexOrThrow(CalendarCache.VALUE);
+                    Log.d(TAG, "onQueryComplete:: keyColumn:" + keyColumn + ",valueColumn:" + valueColumn);
                     while(cursor.moveToNext()) {
                         String key = cursor.getString(keyColumn);
                         String value = cursor.getString(valueColumn);
+                        Log.d(TAG, "onQueryComplete:: key:" + key + ",value:" + value);
                         if (TextUtils.equals(key, CalendarCache.KEY_TIMEZONE_TYPE)) {
                             boolean useHomeTZ = !TextUtils.equals(
                                     value, CalendarCache.TIMEZONE_TYPE_AUTO);
