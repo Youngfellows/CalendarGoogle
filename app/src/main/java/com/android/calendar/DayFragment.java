@@ -23,6 +23,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,8 @@ import android.widget.ViewSwitcher.ViewFactory;
  * This is the base class for Day and Week Activities.
  */
 public class DayFragment extends Fragment implements CalendarController.EventHandler, ViewFactory {
+    private String TAG = this.getClass().getSimpleName();
+
     /**
      * The view id used for all the views we create. It's OK to have all child
      * views have the same ID. This ID is used to pick which view receives
@@ -63,6 +66,7 @@ public class DayFragment extends Fragment implements CalendarController.EventHan
                 return;
             }
             String tz = Utils.getTimeZone(getActivity(), mTZUpdater);
+            Log.d(TAG, "mTZUpdater run:: tz:" + tz);
             mSelectedDay.timezone = tz;
             mSelectedDay.normalize(true);
         }

@@ -633,7 +633,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             Log.d(TAG, "Initializing to " + timeMillis + " for view " + viewType);
         }
         FragmentTransaction ft = getFragmentManager().beginTransaction();
-
+        Log.d(TAG, "initFragments:: mShowCalendarControls:" + mShowCalendarControls + ",timeMillis:" + timeMillis);
         if (mShowCalendarControls) {
             Fragment miniMonthFrag = new MonthByWeekFragment(timeMillis, true);
             ft.replace(R.id.mini_month, miniMonthFrag);

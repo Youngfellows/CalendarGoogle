@@ -95,8 +95,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         ScaleGestureDetector.OnScaleGestureListener, View.OnClickListener, View.OnLongClickListener
         {
     private static String TAG = "DayView";
-    private static boolean DEBUG = false;
-    private static boolean DEBUG_SCALING = false;
+    private static boolean DEBUG = true;
+    private static boolean DEBUG_SCALING = true;
     private static final String PERIOD_SPACE = ". ";
 
     private static float mScale = 0; // Used for supporting different screen densities
@@ -154,7 +154,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     private static final int FROM_LEFT = 4;
     private static final int FROM_RIGHT = 8;
 
-    private static final int ACCESS_LEVEL_NONE = 0;
+    private static final int ACCESS_LEVEL_NONE = 0;//访问级别
     private static final int ACCESS_LEVEL_DELETE = 1;
     private static final int ACCESS_LEVEL_EDIT = 2;
 
@@ -358,8 +358,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     private static float GRID_LINE_LEFT_MARGIN = 0;
     private static final float GRID_LINE_INNER_WIDTH = 1;
 
-    private static final int DAY_GAP = 1;
-    private static final int HOUR_GAP = 1;
+    private static final int DAY_GAP = 1;//日差
+    private static final int HOUR_GAP = 1;//时差
     // This is the standard height of an allday event with no restrictions
     private static int SINGLE_ALLDAY_HEIGHT = 34;
     /**
@@ -853,6 +853,13 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             }
 
             mDayStrs2Letter[index + 7] = mDayStrs2Letter[index];
+        }
+
+        for (String day1 : mDayStrs) {
+            Log.d(TAG, "init:: mDayStrs: " + day1);
+        }
+        for (String day1 : mDayStrs2Letter) {
+            Log.d(TAG, "init:: mDayStrs2Letter: " + day1);
         }
 
         // Figure out how much space we need for the 3-letter abbrev names
