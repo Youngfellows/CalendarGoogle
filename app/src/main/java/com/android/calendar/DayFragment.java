@@ -57,8 +57,9 @@ public class DayFragment extends Fragment implements CalendarController.EventHan
     protected Animation mOutAnimationBackward;
     EventLoader mEventLoader;
 
-    Time mSelectedDay = new Time();
+    Time mSelectedDay = new Time();//当前日期
 
+    //获取当前时区的当前日期
     private final Runnable mTZUpdater = new Runnable() {
         @Override
         public void run() {
