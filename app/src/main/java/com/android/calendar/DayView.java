@@ -948,6 +948,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         mLastSelectionHourForAccessibility = 0;
         mLastSelectedEventForAccessibility = null;
         mSelectionMode = SELECTION_HIDDEN;
+        Log.d(TAG, "handleOnResume:: mHourStrs:" + Arrays.asList(mHourStrs) + ",mFirstDayOfWeek:" + mFirstDayOfWeek);
+
     }
 
     private void initAccessibilityVariables() {
@@ -1860,6 +1862,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         }
     }
 
+    //切换视图
     private View switchViews(boolean forward, float xOffSet, float width, float velocity) {
         mAnimationDistance = width - xOffSet;
         if (DEBUG) {
@@ -1885,6 +1888,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             outToXValue = 1.0f;
         }
 
+        //更新切换的下一个视图的起始时间
         final Time start = new Time(mBaseDate.timezone);
         start.set(mController.getTime());
         if (forward) {
@@ -1931,7 +1935,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         view.cleanup();
         mViewSwitcher.showNext();
         view = (DayView) mViewSwitcher.getCurrentView();
-        view.setSelected(newSelected, true, false);
+        view.setSelected(newSelected, true, false);//切换下一个视图
         view.requestFocus();
         view.reloadEvents();
         view.updateTitle();
@@ -2220,6 +2224,9 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                 }
             }
         }
+        Log.d(TAG, "computeEventRelations:: mHasAllDayEvent:" + mHasAllDayEvent.length);
+        Log.d(TAG, "computeEventRelations:: mEarliestStartHour:" + mEarliestStartHour.length);
+
         mMaxAlldayEvents = maxAllDayEvents;
         initAllDayHeights();
     }
@@ -2279,6 +2286,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             canvas.translate(mViewStartX, -yTranslate);
         }
 
+        //绘制不可滚动得固定区域
         // Draw the fixed areas (that don't scroll) directly to the canvas.
         drawAfterScroll(canvas);
         if (mComputeSelectedEvents && mUpdateToast) {
@@ -2319,6 +2327,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         }
 
         drawScrollLine(r, canvas, p);
+        //绘制顶部的一周日期
         drawDayHeaderLoop(r, canvas, p);
 
         // Draw the AM and PM indicators if we're in 12 hour mode
@@ -2436,7 +2445,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
         p.setTypeface(mBold);
         p.setTextAlign(Align.RIGHT);
-        int cell = mFirstJulianDay;
+        int cell = mFirstJulianDay;//可见的第一个儒略历日
 
         String[] dayNames;
         if (mDateStrWidth < mCellWidth) {
@@ -2446,8 +2455,9 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         }
 
         p.setAntiAlias(true);
+        Log.d(TAG, "drawDayHeaderLoop:: mFirstVisibleDayOfWeek:" + mFirstVisibleDayOfWeek + ",cell:" + cell + ",mNumDays:" + mNumDays);
         for (int day = 0; day < mNumDays; day++, cell++) {
-            int dayOfWeek = day + mFirstVisibleDayOfWeek;
+            int dayOfWeek = day + mFirstVisibleDayOfWeek;//周的可见第一天是周几
             if (dayOfWeek >= 14) {
                 dayOfWeek -= 14;
             }
@@ -2617,6 +2627,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
     private void drawDayHeader(String dayStr, int day, int cell, Canvas canvas, Paint p) {
         int dateNum = mFirstVisibleDate + day;
+        Log.d(TAG, "drawDayHeader:: mFirstVisibleDate:" + mFirstVisibleDate + ",mFirstVisibleDayOfWeek:" + mFirstVisibleDayOfWeek);
+        Log.d(TAG, "drawDayHeader:: dayStr:" + dayStr + ",day:" + day + ",dateNum:" + dateNum);
         int x;
         if (dateNum > mMonthLength) {
             dateNum -= mMonthLength;
@@ -3186,7 +3198,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
         final ArrayList<Event> events = mEvents;
         int numEvents = events.size();
-        Log.d(TAG, "drawEvents:: numEvents:" + numEvents);
+        Log.d(TAG, "drawEvents:: numEvents:" + numEvents + ",date:" + date);
         EventGeometry geometry = mEventGeometry;
 
         final int viewEndY = mViewStartY + mViewHeight - DAY_HEADER_HEIGHT - mAlldayHeight;
@@ -4962,6 +4974,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         }
     }
 
+    //更新当前时间
     class UpdateCurrentTime implements Runnable {
 
         public void run() {
@@ -4973,6 +4986,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                         - (currentTime % UPDATE_CURRENT_TIME_DELAY));
             }
             mTodayJulianDay = Time.getJulianDay(currentTime, mCurrentTime.gmtoff);
+            Log.d(TAG, "UpdateCurrentTime run:: mTodayJulianDay:" + mTodayJulianDay);
             invalidate();
         }
     }
