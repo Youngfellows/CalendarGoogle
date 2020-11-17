@@ -257,7 +257,8 @@ public class Event implements Cloneable {
                 where += hideString;
                 whereAllday += hideString;
             }
-
+            Log.d(TAG, "loadEvents:: where:" + where);
+            Log.d(TAG, "loadEvents:: whereAllday:" + whereAllday);
             cEvents = instancesQuery(context.getContentResolver(), EVENT_PROJECTION, startDay,
                     endDay, where, null, SORT_EVENTS_BY);
             cAllday = instancesQuery(context.getContentResolver(), EVENT_PROJECTION, startDay,
@@ -306,6 +307,11 @@ public class Event implements Cloneable {
      */
     private static final Cursor instancesQuery(ContentResolver cr, String[] projection,
             int startDay, int endDay, String selection, String[] selectionArgs, String orderBy) {
+        Log.d(TAG, "instancesQuery::> startDay:" + startDay + ",endDay:" + endDay);
+        Log.d(TAG, "instancesQuery::> selection:" + selection);
+        Log.d(TAG, "instancesQuery::> projection:" + (selection != null ? Arrays.asList(projection) : projection));
+        Log.d(TAG, "instancesQuery::> selectionArgs:" + (selectionArgs != null ? Arrays.asList(selectionArgs) : selectionArgs));
+
         String WHERE_CALENDARS_SELECTED = Calendars.VISIBLE + "=?";
         String[] WHERE_CALENDARS_ARGS = {"1"};
         String DEFAULT_SORT_ORDER = "begin ASC";
@@ -325,6 +331,11 @@ public class Event implements Cloneable {
                 selectionArgs = WHERE_CALENDARS_ARGS;
             }
         }
+        Log.d(TAG, "instancesQuery:: uri:" + builder.build());
+        Log.d(TAG, "instancesQuery:: selection:" + selection);
+        Log.d(TAG, "instancesQuery:: projection:" + Arrays.asList(projection));
+        Log.d(TAG, "instancesQuery:: selectionArgs:" + Arrays.asList(selectionArgs));
+
         return cr.query(builder.build(), projection, selection, selectionArgs,
                 orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
     }

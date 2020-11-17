@@ -31,7 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class EventLoader {
-
+    private static String TAG = EventLoader.class.getSimpleName();
     private Context mContext;
     private Handler mHandler = new Handler();
     private AtomicInteger mSequenceNumber = new AtomicInteger();
@@ -180,6 +180,8 @@ public class EventLoader {
         @Override
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            Log.d(TAG, "run:: loader enent ...");
+
             while (true) {
                 try {
                     // Wait for the next request

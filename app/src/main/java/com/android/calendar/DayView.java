@@ -2047,6 +2047,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         }
     };
 
+    //加载日程
     /* package */ void reloadEvents() {
         // Protect against this being called before this view has been
         // initialized.
@@ -2055,6 +2056,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 //        }
 
         // Make sure our time zones are up to date
+        Log.w(TAG, Log.getStackTraceString(new IllegalArgumentException("更新日程...")));
+
         mTZUpdater.run();
 
         setSelectedEvent(null);
@@ -2078,9 +2081,12 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         // load events in the background
 //        mContext.startProgressSpinner();
         final ArrayList<Event> events = new ArrayList<Event>();
+        Log.d(TAG, "reloadEvents:: mNumDays:" + mNumDays + ",mFirstJulianDay:" + mFirstJulianDay);
         mEventLoader.loadEventsInBackground(mNumDays, events, mFirstJulianDay, new Runnable() {
 
             public void run() {
+                Log.d(TAG, "reloadEvents run:: loade events success,events size is " + events.size());
+
                 boolean fadeinEvents = mFirstJulianDay != mLoadedFirstJulianDay;
                 mEvents = events;
                 mLoadedFirstJulianDay = mFirstJulianDay;
@@ -2175,8 +2181,12 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                 // Count all the events being drawn as allDay events
                 final int firstDay = Math.max(event.startDay, mFirstJulianDay);
                 final int lastDay = Math.min(event.endDay, mLastJulianDay);
+                Log.d(TAG, "computeEventRelations:: firstDay:" + firstDay);
+                Log.d(TAG, "computeEventRelations:: lastDay:" + lastDay);
                 for (int day = firstDay; day <= lastDay; day++) {
+                    Log.d(TAG, "computeEventRelations:: day:" + day + ",mFirstJulianDay:" + mFirstJulianDay + ",firstDay:" + firstDay + ",lastDay:" + lastDay);
                     final int count = ++eventsCount[day - mFirstJulianDay];
+                    Log.d(TAG, "computeEventRelations:: count:" + count + ",maxAllDayEvents:" + maxAllDayEvents + ",(day - mFirstJulianDay):" + (day - mFirstJulianDay));
                     if (maxAllDayEvents < count) {
                         maxAllDayEvents = count;
                     }
@@ -2516,7 +2526,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
         // Draw each day
         int cell = mFirstJulianDay;
-        Log.d(TAG, "doDraw:: cell: " + cell);
+        Log.d(TAG, "doDraw:: cell:" + cell + ",mTodayJulianDay:" + mTodayJulianDay);
         p.setAntiAlias(false);
         int alpha = p.getAlpha();
         p.setAlpha(mEventsAlpha);
@@ -3159,6 +3169,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         }
     }
 
+    //绘制日程
     private void drawEvents(int date, int dayIndex, int top, Canvas canvas, Paint p) {
         Paint eventTextPaint = mEventTextPaint;
         int left = computeDayLeftPosition(dayIndex) + 1;
@@ -3171,9 +3182,11 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         selectionArea.bottom = selectionArea.top + cellHeight;
         selectionArea.left = left;
         selectionArea.right = selectionArea.left + cellWidth;
+        Log.d(TAG, "drawEvents:: selectionArea.left:" + selectionArea.left + ",selectionArea.top:" + selectionArea.top + ",selectionArea.right:" + selectionArea.right + ",selectionArea.bottom:" + selectionArea.bottom);
 
         final ArrayList<Event> events = mEvents;
         int numEvents = events.size();
+        Log.d(TAG, "drawEvents:: numEvents:" + numEvents);
         EventGeometry geometry = mEventGeometry;
 
         final int viewEndY = mViewStartY + mViewHeight - DAY_HEADER_HEIGHT - mAlldayHeight;
