@@ -55,6 +55,7 @@ import com.android.calendar.Utils;
 import com.android.calendar.event.CreateEventDialogFragment;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -174,6 +175,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
      */
     private Uri updateUri() {
         SimpleWeekView child = (SimpleWeekView) mListView.getChildAt(0);
+        Log.d(TAG, "updateUri:: child:" + child);
         if (child != null) {
             int julianDay = child.getFirstJulianDay();
             mFirstLoadedJulianDay = julianDay;
@@ -185,7 +187,9 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
         // +1 to ensure we get all day events from any time zone
         mTempTime.setJulianDay(mLastLoadedJulianDay + 1);
         long end = mTempTime.toMillis(true);
-
+        Log.d(TAG, "updateUri:: mFirstLoadedJulianDay:" + mFirstLoadedJulianDay + ",mLastLoadedJulianDay:" + mLastLoadedJulianDay);
+        Log.d(TAG, "updateUri:: start:" + start + ",end:" + end);
+        Log.w(TAG, Log.getStackTraceString(new IllegalArgumentException("哪里调用了updateUri ...")));
         // Create a new uri with the updated times
         Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
         ContentUris.appendId(builder, start);
@@ -313,6 +317,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
             mListView.setBackgroundColor(getResources().getColor(R.color.month_bgcolor));
         }
 
+        Log.w(TAG, "onActivityCreated: ^^_^^ ...,mShowCalendarControls:" + mShowCalendarControls);
         // To get a smoother transition when showing this fragment, delay loading of events until
         // the fragment is expended fully and the calendar controls are gone.
         if (mShowCalendarControls) {
@@ -335,6 +340,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
 
     @Override
     protected void setUpHeader() {
+        Log.w(TAG, "setUpHeader:: ^^_^^ ... ");
         if (mIsMiniMonth) {
             super.setUpHeader();
             return;
@@ -345,11 +351,14 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
             mDayLabels[i - Calendar.SUNDAY] = DateUtils.getDayOfWeekString(i,
                     DateUtils.LENGTH_MEDIUM).toUpperCase();
         }
+        //[周日, 周一, 周二, 周三, 周四, 周五, 周六]
+        Log.w(TAG, "setUpHeader:: ^^_^^ " + Arrays.asList(mDayLabels));
     }
 
     // TODO
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.w   (TAG, "onCreateLoader:: mIsMiniMonth:"+mIsMiniMonth);
         if (mIsMiniMonth) {
             return null;
         }
@@ -360,6 +369,9 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
                     - (mNumWeeks * 7 / 2);
             mEventUri = updateUri();
             String where = updateWhere();
+
+            Log.d(TAG, "onCreateLoader:: mEventUri:" + mEventUri);
+            Log.d(TAG, "onCreateLoader:: where:" + where);
 
             loader = new CursorLoader(
                     getActivity(), mEventUri, Event.EVENT_PROJECTION, where,
@@ -391,6 +403,9 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.w(TAG, "onLoadFinished:: data size:" + data.getCount());
+        //Log.i(TAG, Log.getStackTraceString(new IllegalArgumentException("何处调用的onLoadFinished() ...")));
+
         synchronized (mUpdateLoader) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "Found " + data.getCount() + " cursor entries for uri " + mEventUri);
@@ -415,6 +430,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+        Log.d(TAG, "onLoaderReset:: ");
     }
 
     @Override

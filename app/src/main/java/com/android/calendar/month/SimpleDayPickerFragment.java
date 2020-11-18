@@ -41,6 +41,7 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -240,6 +241,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
 
         mMonthName = (TextView) getView().findViewById(R.id.month_name);
         SimpleWeekView child = (SimpleWeekView) mListView.getChildAt(0);
+        Log.d(TAG, "onActivityCreated:: child:" + child);
         if (child == null) {
             return;
         }
@@ -255,11 +257,13 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
      * different strings or modify the view params.
      */
     protected void setUpHeader() {
+        Log.w(TAG, "setUpHeader:: ... ");
         mDayLabels = new String[7];
         for (int i = Calendar.SUNDAY; i <= Calendar.SATURDAY; i++) {
             mDayLabels[i - Calendar.SUNDAY] = DateUtils.getDayOfWeekString(i,
                     DateUtils.LENGTH_SHORTEST).toUpperCase();
         }
+        Log.w(TAG, "setUpHeader:: " + Arrays.asList(mDayLabels));
     }
 
     /**
@@ -310,6 +314,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
      * preference space.
      */
     protected void doResumeUpdates() {
+        Log.w(TAG, "doResumeUpdates:: ... ");
         // Get default week start based on locale, subtracting one for use with android Time.
         Calendar cal = Calendar.getInstance(Locale.getDefault());
         mFirstDayOfWeek = cal.getFirstDayOfWeek() - 1;
