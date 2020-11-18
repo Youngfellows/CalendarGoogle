@@ -513,13 +513,15 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
 
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
-
+        Log.w(TAG, "onScrollStateChanged:: ^^_^^ .... , scrollState:" + scrollState);
         synchronized (mUpdateLoader) {
+            //滚动状态,停止加载
             if (scrollState != OnScrollListener.SCROLL_STATE_IDLE) {
                 mShouldLoad = false;
                 stopLoader();
                 mDesiredDay.setToNow();
             } else {
+                //未滚动,加载Event数据
                 mHandler.removeCallbacks(mUpdateLoader);
                 mShouldLoad = true;
                 mHandler.postDelayed(mUpdateLoader, LOADER_DELAY);
