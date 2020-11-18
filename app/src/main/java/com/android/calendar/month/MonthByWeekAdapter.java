@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MonthByWeekAdapter extends SimpleWeeksAdapter {
-    private static final String TAG = "MonthByWeekAdapter";
+    //private  final String TAG = "MonthByWeekAdapter";
 
     public static final String WEEK_PARAMS_IS_MINI = "mini_month";
     protected static int DEFAULT_QUERY_DAYS = 7 * 8; // 8 weeks

@@ -19,6 +19,7 @@ package com.android.calendar.month;
 import com.android.calendar.R;
 import com.android.calendar.Utils;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.content.Context;
@@ -53,9 +54,11 @@ import java.util.Locale;
  * easily display a month selection component in a given style.
  * </p>
  */
+@SuppressLint("ValidFragment")
 public class SimpleDayPickerFragment extends ListFragment implements OnScrollListener {
 
-    private static final String TAG = "MonthFragment";
+    protected final String TAG = this.getClass().getSimpleName();
+
     private static final String KEY_CURRENT_TIME = "current_time";
 
     // Affects when the month selection will change while scrolling up
@@ -154,18 +157,22 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
     };
 
     public SimpleDayPickerFragment(long initialTime) {
+        Log.d(TAG, "SimpleDayPickerFragment:: time:" + initialTime);
         goTo(initialTime, false, true, true);
+
         mHandler = new Handler();
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        Log.w(TAG, "onAttach:: ...");
         mContext = activity;
         String tz = Time.getCurrentTimezone();
         ViewConfiguration viewConfig = ViewConfiguration.get(activity);
         mMinimumFlingVelocity = viewConfig.getScaledMinimumFlingVelocity();
 
+        //设置时区
         // Ensure we're in the correct time zone
         mSelectedDay.switchTimezone(tz);
         mSelectedDay.normalize(true);
@@ -189,7 +196,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
                 LIST_TOP_OFFSET *= mScale;
             }
         }
-        setUpAdapter();
+        setUpAdapter();//覆盖此方法提供自定义适配器,调用子类的 setUpAdapter()
         setListAdapter(mAdapter);
     }
 
@@ -198,6 +205,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
      * this method to provide a custom adapter.
      */
     protected void setUpAdapter() {
+        Log.w(TAG, "setUpAdapter:: mNumWeeks:" + mNumWeeks + ",mShowWeekNumber:" + mShowWeekNumber + ",mFirstDayOfWeek:" + mFirstDayOfWeek + ",mSelectedDay:" + (Time.getJulianDay(mSelectedDay.toMillis(false), mSelectedDay.gmtoff)));
         HashMap<String, Integer> weekParams = new HashMap<String, Integer>();
         weekParams.put(SimpleWeeksAdapter.WEEK_PARAMS_NUM_WEEKS, mNumWeeks);
         weekParams.put(SimpleWeeksAdapter.WEEK_PARAMS_SHOW_WEEK, mShowWeekNumber ? 1 : 0);
@@ -217,6 +225,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.w(TAG, "onCreate:: ...");
         if (savedInstanceState != null && savedInstanceState.containsKey(KEY_CURRENT_TIME)) {
             goTo(savedInstanceState.getLong(KEY_CURRENT_TIME), false, true, true);
         }
@@ -225,7 +234,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
+        Log.w(TAG, "onActivityCreated:: ...");
         setUpListView();
         setUpHeader();
 
@@ -278,6 +287,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
     @Override
     public void onResume() {
         super.onResume();
+        Log.w(TAG, "onResume:: ... ");
         setUpAdapter();
         doResumeUpdates();
     }
@@ -285,11 +295,13 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
     @Override
     public void onPause() {
         super.onPause();
+        Log.w(TAG, "onPause:: ... ");
         mHandler.removeCallbacks(mTodayUpdater);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        Log.w(TAG, "onSaveInstanceState:: ... ");
         outState.putLong(KEY_CURRENT_TIME, mSelectedDay.toMillis(true));
     }
 
@@ -344,6 +356,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.w(TAG, "onCreateView:: ... ");
         View v = inflater.inflate(R.layout.month_by_week,
                 container, false);
         mDayNamesHeader = (ViewGroup) v.findViewById(R.id.day_names);
@@ -376,6 +389,9 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
      * @return Whether or not the view animated to the new location
      */
     public boolean goTo(long time, boolean animate, boolean setSelected, boolean forceScroll) {
+        Log.d(TAG, "goTo:: time:" + time + ",animate:" + animate + ",setSelected:" + setSelected + ",forceScroll:" + forceScroll);
+        Log.w(TAG, Log.getStackTraceString(new IllegalArgumentException("哪里调用的goto...")));
+
         if (time == -1) {
             Log.e(TAG, "time is invalid");
             return false;
@@ -390,6 +406,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
         // If this view isn't returned yet we won't be able to load the lists
         // current position, so return after setting the selected day.
         if (!isResumed()) {
+            Log.d(TAG, "We're not visible yet");
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "We're not visible yet");
             }
@@ -398,6 +415,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
 
         mTempTime.set(time);
         long millis = mTempTime.normalize(true);
+        Log.d(TAG, "goTo:: getJulianDay:" + Time.getJulianDay(millis, mTempTime.gmtoff) + ",mFirstDayOfWeek:" + mFirstDayOfWeek);
         // Get the week we're going to
         // TODO push Util function into Calendar public api.
         int position = Utils.getWeeksSinceEpochFromJulianDay(

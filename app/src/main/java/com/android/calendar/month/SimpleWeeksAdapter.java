@@ -47,7 +47,8 @@ import java.util.Locale;
  */
 public class SimpleWeeksAdapter extends BaseAdapter implements OnTouchListener {
 
-    private static final String TAG = "MonthByWeek";
+    protected final String TAG = this.getClass().getSimpleName();
+
 
     /**
      * The number of weeks to display at a time.
@@ -103,6 +104,7 @@ public class SimpleWeeksAdapter extends BaseAdapter implements OnTouchListener {
         // Get default week start based on locale, subtracting one for use with android Time.
         Calendar cal = Calendar.getInstance(Locale.getDefault());
         mFirstDayOfWeek = cal.getFirstDayOfWeek() - 1;
+        Log.d(TAG, "SimpleWeeksAdapter:: mFirstDayOfWeek:" + mFirstDayOfWeek);
 
         if (mScale == 0) {
             mScale = context.getResources().getDisplayMetrics().density;
@@ -148,12 +150,14 @@ public class SimpleWeeksAdapter extends BaseAdapter implements OnTouchListener {
         }
         if (params.containsKey(WEEK_PARAMS_JULIAN_DAY)) {
             int julianDay = params.get(WEEK_PARAMS_JULIAN_DAY);
-            mSelectedDay.setJulianDay(julianDay);
-            mSelectedWeek = Utils.getWeeksSinceEpochFromJulianDay(julianDay, mFirstDayOfWeek);
+            Log.d(TAG, "updateParams:: julianDay:" + julianDay);
+            mSelectedDay.setJulianDay(julianDay);//选中高亮的当前日期
+            mSelectedWeek = Utils.getWeeksSinceEpochFromJulianDay(julianDay, mFirstDayOfWeek);//返回纪元后以指定天开始的当前天是纪元后的第几周
         }
         if (params.containsKey(WEEK_PARAMS_DAYS_PER_WEEK)) {
             mDaysPerWeek = params.get(WEEK_PARAMS_DAYS_PER_WEEK);
         }
+        Log.d(TAG, "updateParams:: mSelectedWeek:" + mSelectedWeek);
         refresh();
     }
 
@@ -226,7 +230,7 @@ public class SimpleWeeksAdapter extends BaseAdapter implements OnTouchListener {
 
         int selectedDay = -1;
         if (mSelectedWeek == position) {
-            selectedDay = mSelectedDay.weekDay;
+            selectedDay = mSelectedDay.weekDay;//高亮选中的是星期几
         }
 
         // pass in all the view parameters

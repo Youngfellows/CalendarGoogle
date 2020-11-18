@@ -16,6 +16,7 @@
 
 package com.android.calendar.month;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.LoaderManager;
@@ -61,7 +62,7 @@ import java.util.List;
 public class MonthByWeekFragment extends SimpleDayPickerFragment implements
         CalendarController.EventHandler, LoaderManager.LoaderCallbacks<Cursor>, OnScrollListener,
         OnTouchListener {
-    private static final String TAG = "MonthFragment";
+    //private static final String TAG = "MonthFragment";
     private static final String TAG_EVENT_DIALOG = "event_dialog";
 
     private CreateEventDialogFragment mEventDialog;
@@ -231,6 +232,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
 
     @Override
     public void onAttach(Activity activity) {
+        Log.w(TAG, "onAttach: ^^_^^ ...");
         super.onAttach(activity);
         mTZUpdater.run();
         if (mAdapter != null) {
@@ -252,6 +254,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
 
     @Override
     public void onDetach() {
+        Log.w(TAG, "onDetach: ^^_^^ ...");
         mIsDetached = true;
         super.onDetach();
         if (mShowCalendarControls) {
@@ -263,6 +266,8 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
 
     @Override
     protected void setUpAdapter() {
+        Log.w(TAG, "setUpAdapter:: ^^_^^ .... ");
+
         mFirstDayOfWeek = Utils.getFirstDayOfWeek(mContext);
         mShowWeekNumber = Utils.getShowWeekNumber(mContext);
 
@@ -286,6 +291,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.w(TAG, "onCreateView: ^^_^^ ... ,mIsMiniMonth:" + mIsMiniMonth);
         View v;
         if (mIsMiniMonth) {
             v = inflater.inflate(R.layout.month_by_week, container, false);
@@ -298,6 +304,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        Log.w(TAG, "onActivityCreated: ^^_^^ ...");
         super.onActivityCreated(savedInstanceState);
         mListView.setSelector(new StateListDrawable());
         mListView.setOnTouchListener(this);
@@ -320,6 +327,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
         this(System.currentTimeMillis(), true);
     }
 
+    @SuppressLint("ValidFragment")
     public MonthByWeekFragment(long initialTime, boolean isMiniMonth) {
         super(initialTime);
         mIsMiniMonth = isMiniMonth;
@@ -425,15 +433,20 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
     @Override
     public void handleEvent(EventInfo event) {
         if (event.eventType == EventType.GO_TO) {
+            Log.d(TAG, "handleEvent:: JulianDay selectedTime: " + (Time.getJulianDay(event.selectedTime.toMillis(true), event.selectedTime.gmtoff)));
+            Log.d(TAG, "handleEvent:: JulianDay mFirstVisibleDay: " + (Time.getJulianDay(mFirstVisibleDay.toMillis(true), mFirstVisibleDay.gmtoff)));
+
             boolean animate = true;
             if (mDaysPerWeek * mNumWeeks * 2 < Math.abs(
                     Time.getJulianDay(event.selectedTime.toMillis(true), event.selectedTime.gmtoff)
-                    - Time.getJulianDay(mFirstVisibleDay.toMillis(true), mFirstVisibleDay.gmtoff)
-                    - mDaysPerWeek * mNumWeeks / 2)) {
+                            - Time.getJulianDay(mFirstVisibleDay.toMillis(true), mFirstVisibleDay.gmtoff)
+                            - mDaysPerWeek * mNumWeeks / 2)) {
                 animate = false;
             }
-            mDesiredDay.set(event.selectedTime);
+            mDesiredDay.set(event.selectedTime);//设置预期的日期
             mDesiredDay.normalize(true);
+            Log.d(TAG, "handleEvent:: extraLong:" + event.extraLong + ",EXTRA_GOTO_TODAY:" + CalendarController.EXTRA_GOTO_TODAY + ",animateToday:" + (event.extraLong & CalendarController.EXTRA_GOTO_TODAY));
+
             boolean animateToday = (event.extraLong & CalendarController.EXTRA_GOTO_TODAY) != 0;
             boolean delayAnimation = goTo(event.selectedTime.toMillis(true), animate, true, false);
             if (animateToday) {

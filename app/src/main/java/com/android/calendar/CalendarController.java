@@ -246,6 +246,25 @@ public class CalendarController {
             }
             return extra;
         }
+
+        @Override
+        public String toString() {
+            return "EventInfo{" +
+                    "eventType=" + eventType +
+                    ", viewType=" + viewType +
+                    ", id=" + id +
+                    ", selectedTime=" + selectedTime +
+                    ", startTime=" + startTime +
+                    ", endTime=" + endTime +
+                    ", x=" + x +
+                    ", y=" + y +
+                    ", query='" + query + '\'' +
+                    ", componentName=" + componentName +
+                    ", eventTitle='" + eventTitle + '\'' +
+                    ", calendarId=" + calendarId +
+                    ", extraLong=" + extraLong +
+                    '}';
+        }
     }
 
     /**
@@ -426,6 +445,7 @@ public class CalendarController {
         info.query = query;
         info.componentName = componentName;
         info.extraLong = extraLong;
+        Log.d(TAG, "sendEvent:: " + info.toString());
         this.sendEvent(sender, info);
     }
 
@@ -437,7 +457,8 @@ public class CalendarController {
         }
 
         Long filteredTypes = filters.get(sender);
-        if (filteredTypes != null && (filteredTypes.longValue() & event.eventType) != 0) {
+        Log.d(TAG, "sendEvent:: filteredTypes:" + filteredTypes + ",event.eventType:" + event.eventType);
+        if (filteredTypes != null && (filteredTypes.longValue() & event.eventType) != 0) {//去除重复事件
             // Suppress event per filter
             if (DEBUG) {
                 Log.d(TAG, "Event suppressed");
