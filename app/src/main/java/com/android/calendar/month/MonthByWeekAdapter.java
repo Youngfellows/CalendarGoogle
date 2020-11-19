@@ -82,6 +82,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
 
     public MonthByWeekAdapter(Context context, HashMap<String, Integer> params, Handler handler) {
         super(context, params);
+        Log.w(TAG, "MonthByWeekAdapter: ^**_**^");
         mEventDialogHandler = handler;
         if (params.containsKey(WEEK_PARAMS_IS_MINI)) {
             mIsMiniMonth = params.get(WEEK_PARAMS_IS_MINI) != 0;
@@ -100,6 +101,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
 
     @Override
     protected void init() {
+        Log.w(TAG, "init: ^**_**^");
         super.init();
         mGestureDetector = new GestureDetector(mContext, new CalendarGestureListener());
         mController = CalendarController.getInstance(mContext);
@@ -111,6 +113,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
     }
 
     private void updateTimeZones() {
+        Log.w(TAG, "updateTimeZones: ^**_**^");
         mSelectedDay.timezone = mHomeTimeZone;
         mSelectedDay.normalize(true);
         mToday.timezone = mHomeTimeZone;
@@ -124,10 +127,13 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
         long millis = mSelectedDay.normalize(true);
         mSelectedWeek = Utils.getWeeksSinceEpochFromJulianDay(
                 Time.getJulianDay(millis, mSelectedDay.gmtoff), mFirstDayOfWeek);
+        Log.w(TAG, "setSelectedDay: ^**_**^,选中第mSelectedWeek:" + mSelectedWeek + "周,selectedTime:" + selectedTime);
+
         notifyDataSetChanged();
     }
 
     public void setEvents(int firstJulianDay, int numDays, ArrayList<Event> events) {
+        Log.w(TAG, "setEvents: ^**_**^,firstJulianDay:" + firstJulianDay + ",numDays:" + numDays + ",events size:" + events.size());
         if (mIsMiniMonth) {
             if (Log.isLoggable(TAG, Log.ERROR)) {
                 Log.e(TAG, "Attempted to set events for mini view. Events only supported in full"
@@ -186,6 +192,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
     @SuppressWarnings("unchecked")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        Log.w(TAG, "getView: ^**_**^,position:" + position + ",mIsMiniMonth:" + mIsMiniMonth + ",mSelectedWeek:" + mSelectedWeek);
         if (mIsMiniMonth) {
             return super.getView(position, convertView, parent);
         }
@@ -253,6 +260,8 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
     }
 
     private void sendEventsToView(MonthWeekEventsView v) {
+        Log.w(TAG, "sendEventsToView: ^**_**^ ");
+
         if (mEventDayList.size() == 0) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "No events loaded, did not pass any events to view.");
@@ -276,6 +285,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
 
     @Override
     protected void refresh() {
+        Log.w(TAG, "refresh: ^**_**^ ");
         mFirstDayOfWeek = Utils.getFirstDayOfWeek(mContext);
         mShowWeekNumber = Utils.getShowWeekNumber(mContext);
         mHomeTimeZone = Utils.getTimeZone(mContext, null);
@@ -286,6 +296,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
 
     @Override
     protected void onDayTapped(Time day) {
+        Log.w(TAG, "onDayTapped: ^**_**^ ");
         setDayParameters(day);
          if (mShowAgendaWithMonth || mIsMiniMonth) {
             // If agenda view is visible with month view , refresh the views
@@ -313,6 +324,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        Log.w(TAG, "onTouch: ^**_**^ ");
         if (!(v instanceof MonthWeekEventsView)) {
             return super.onTouch(v, event);
         }
@@ -369,6 +381,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
 
         @Override
         public void onLongPress(MotionEvent e) {
+            Log.w(TAG, "onLongPress: ^**_**^ ");
             if (mLongClickedView != null) {
                 Time day = mLongClickedView.getDayFromLocation(mClickedXLocation);
                 if (day != null) {

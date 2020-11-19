@@ -57,7 +57,7 @@ public class MonthWeekEventsView extends SimpleWeekView {
 
     private static final String TAG = "MonthView";
 
-    private static final boolean DEBUG_LAYOUT = false;
+    private static final boolean DEBUG_LAYOUT = true;
 
     public static final String VIEW_PARAMS_ORIENTATION = "orientation";
     public static final String VIEW_PARAMS_ANIMATE_TODAY = "animate_today";

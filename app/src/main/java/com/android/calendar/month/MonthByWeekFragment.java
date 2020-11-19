@@ -114,11 +114,12 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
         }
     };
 
-
+    //更新当前时区及时间
     private final Runnable mTZUpdater = new Runnable() {
         @Override
         public void run() {
             String tz = Utils.getTimeZone(mContext, mTZUpdater);
+            Log.d(TAG, "mTZUpdater run:: tz:" + tz);
             mSelectedDay.timezone = tz;
             mSelectedDay.normalize(true);
             mTempTime.timezone = tz;
@@ -145,6 +146,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
 
                 // Start the loader again
                 mEventUri = updateUri();
+                Log.d(TAG, "mUpdateLoader run:: mEventUri:" + mEventUri);
 
                 mLoader.setUri(mEventUri);
                 mLoader.startLoading();
@@ -236,8 +238,9 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
 
     @Override
     public void onAttach(Activity activity) {
-        Log.w(TAG, "onAttach: ^^_^^ ...");
+        Log.w(TAG, "onAttach: ^^_^^ ..., start mAdapter:" + mAdapter + ",mSelectedDay:" + mSelectedDay);
         super.onAttach(activity);
+        Log.w(TAG, "onAttach: ^^_^^ ..., end mAdapter:" + mAdapter + ",mSelectedDay:" + mSelectedDay);
         mTZUpdater.run();
         if (mAdapter != null) {
             mAdapter.setSelectedDay(mSelectedDay);
@@ -395,7 +398,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
         }
         mDaysPerWeek = Utils.getDaysPerWeek(mContext);
         updateHeader();
-        mAdapter.setSelectedDay(mSelectedDay);
+        mAdapter.setSelectedDay(mSelectedDay);//高亮选中当前天
         mTZUpdater.run();
         mTodayUpdater.run();
         goTo(mSelectedDay.toMillis(true), false, true, false);

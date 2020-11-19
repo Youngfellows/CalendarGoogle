@@ -120,6 +120,7 @@ public class SimpleWeeksAdapter extends BaseAdapter implements OnTouchListener {
      * Set up the gesture detector and selected time
      */
     protected void init() {
+        Log.w(TAG, "init: ^**_**^ ...");
         mGestureDetector = new GestureDetector(mContext, new CalendarGestureListener());
         mSelectedDay = new Time();
         mSelectedDay.setToNow();

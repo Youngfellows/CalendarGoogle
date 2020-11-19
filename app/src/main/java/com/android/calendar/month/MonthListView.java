@@ -21,6 +21,7 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.text.format.Time;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -39,7 +40,7 @@ public class MonthListView extends ListView {
     // fling. Above MULTIPLE_MONTH_VELOCITY_THRESHOLD, do multiple month flings according to the
     // fling strength. When doing multiple month fling, the velocity is reduced by this threshold
     // to prevent moving from one month fling to 4 months and above flings.
-    private static int MIN_VELOCITY_FOR_FLING = 1500;
+    private static int MIN_VELOCITY_FOR_FLING = 1500;//最小拖拽速度
     private static int MULTIPLE_MONTH_VELOCITY_THRESHOLD = 2000;
     private static int FLING_VELOCITY_DIVIDER = 500;
     private static int FLING_TIME = 1000;
@@ -79,7 +80,7 @@ public class MonthListView extends ListView {
 
     private void init(Context c) {
         mListContext = c;
-        mTracker  = VelocityTracker.obtain();
+        mTracker  = VelocityTracker.obtain();//拖拽追踪器
         mTempTime = new Time(Utils.getTimeZone(c,mTimezoneUpdater));
         if (mScale == 0) {
             mScale = c.getResources().getDisplayMetrics().density;
@@ -91,11 +92,13 @@ public class MonthListView extends ListView {
         }
     }
 
+    //事件响应
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         return processEvent(ev) || super.onTouchEvent(ev);
     }
 
+    //事件拦截
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         return processEvent(ev) || super.onInterceptTouchEvent(ev);
@@ -115,7 +118,8 @@ public class MonthListView extends ListView {
             case MotionEvent.ACTION_UP:
                 mTracker.addMovement(ev);
                 mTracker.computeCurrentVelocity(1000);    // in pixels per second
-                float vel =  mTracker.getYVelocity ();
+                float vel =  mTracker.getYVelocity ();//Y方向的拖拽速度
+                Log.d(TAG, "processEvent:: YVelocity:" + vel);
                 if (Math.abs(vel) > MIN_VELOCITY_FOR_FLING) {
                     doFling(vel);
                     return true;
@@ -130,6 +134,7 @@ public class MonthListView extends ListView {
 
     // Do a "snap to start of month" fling
     private void doFling(float velocityY) {
+        Log.d(TAG, "doFling:: velocityY:" + velocityY);
 
         // Stop the list-view movement and take over
         MotionEvent cancelEvent = MotionEvent.obtain(mDownActionTime,  SystemClock.uptimeMillis(),
@@ -157,8 +162,10 @@ public class MonthListView extends ListView {
             }
         }
 
+        Log.d(TAG, "doFling:: monthsToJump:" + monthsToJump);
         // Get the day at the top right corner
         int day = getUpperRightJulianDay();
+        Log.d(TAG, "doFling:: day:" + day);
         // Get the day of the first day of the next/previous month
         // (according to scroll direction)
         mTempTime.setJulianDay(day);
@@ -169,6 +176,7 @@ public class MonthListView extends ListView {
         // scroll will be  at least one view.
         int scrollToDay = Time.getJulianDay(timeInMillis, mTempTime.gmtoff)
                 + ((monthsToJump > 0) ? 6 : 0);
+        Log.d(TAG, "doFling:: scrollToDay:" + scrollToDay);
 
         // Since all views have the same height, scroll by pixels instead of
         // "to position".
@@ -182,6 +190,7 @@ public class MonthListView extends ListView {
         int offset = (viewsToFling > 0) ? -(firstViewHeight - topViewVisiblePart
                 + SimpleDayPickerFragment.LIST_TOP_OFFSET) : (topViewVisiblePart
                 - SimpleDayPickerFragment.LIST_TOP_OFFSET);
+        //滚动到指定位置
         // Fling
         smoothScrollBy(viewsToFling * firstViewHeight + offset, FLING_TIME);
     }

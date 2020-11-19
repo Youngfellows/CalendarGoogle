@@ -125,6 +125,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
     // used for tracking what state listview is in
     protected int mCurrentScrollState = OnScrollListener.SCROLL_STATE_IDLE;
 
+    //午夜凌晨更新
     // This causes an update of the view at midnight
     protected Runnable mTodayUpdater = new Runnable() {
         @Override
@@ -271,6 +272,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
      * set a different list view behavior.
      */
     protected void setUpListView() {
+        Log.w(TAG, "setUpListView:: ^^_^^ ... ");
         // Configure the listview
         mListView = getListView();
         // Transparent background on scroll
@@ -425,13 +427,15 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
         // TODO push Util function into Calendar public api.
         int position = Utils.getWeeksSinceEpochFromJulianDay(
                 Time.getJulianDay(millis, mTempTime.gmtoff), mFirstDayOfWeek);
+        Log.d(TAG, "goTo:: 当前时间是纪元依赖的第几周,position:" + position);
 
         View child;
         int i = 0;
         int top = 0;
         // Find a child that's completely in the view
         do {
-            child = mListView.getChildAt(i++);
+            child = mListView.getChildAt(i++);//找到可见的第一个条目
+            Log.d(TAG, "goTo:: " + i + ",child:" + child);
             if (child == null) {
                 break;
             }
@@ -444,17 +448,18 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
         // Compute the first and last position visible
         int firstPosition;
         if (child != null) {
-            firstPosition = mListView.getPositionForView(child);
+            firstPosition = mListView.getPositionForView(child);//找到可见的第一个条目
         } else {
             firstPosition = 0;
         }
-        int lastPosition = firstPosition + mNumWeeks - 1;
+        int lastPosition = firstPosition + mNumWeeks - 1;//可见的最后一个条目
+        Log.d(TAG, "goTo:: firstPosition:" + firstPosition + ",lastPosition:" + lastPosition + ",top:" + top);
         if (top > BOTTOM_BUFFER) {
             lastPosition--;
         }
 
         if (setSelected) {
-            mAdapter.setSelectedDay(mSelectedDay);
+            mAdapter.setSelectedDay(mSelectedDay);//渲染月视图与高亮选中当前日期
         }
 
         if (Log.isLoggable(TAG, Log.DEBUG)) {
