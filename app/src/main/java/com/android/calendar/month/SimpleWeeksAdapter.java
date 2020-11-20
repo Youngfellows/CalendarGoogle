@@ -87,11 +87,11 @@ public class SimpleWeeksAdapter extends BaseAdapter implements OnTouchListener {
     protected static float mScale = 0;
     protected Context mContext;
     // The day to highlight as selected
-    protected Time mSelectedDay;
+    protected Time mSelectedDay;//高亮选中的日期
     // The week since 1970 that the selected day is in
-    protected int mSelectedWeek;
+    protected int mSelectedWeek;//自1970年以来选定日期所在的一周
     // When the week starts; numbered like Time.<WEEKDAY> (e.g. SUNDAY=0).
-    protected int mFirstDayOfWeek;
+    protected int mFirstDayOfWeek;//周的第一天
     protected boolean mShowWeekNumber = false;
     protected GestureDetector mGestureDetector;
     protected int mNumWeeks = DEFAULT_NUM_WEEKS;

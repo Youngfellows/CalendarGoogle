@@ -48,9 +48,9 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
     private static final long ANIMATE_TODAY_TIMEOUT = 1000;
 
     protected CalendarController mController;
-    protected String mHomeTimeZone;
+    protected String mHomeTimeZone;//当前时区
     protected Time mTempTime;
-    protected Time mToday;
+    protected Time mToday;//当前日期
     protected int mFirstJulianDay;
     protected int mQueryDays;
     protected boolean mIsMiniMonth = true;
@@ -192,7 +192,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
     @SuppressWarnings("unchecked")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Log.w(TAG, "getView: ^**_**^,position:" + position + ",mIsMiniMonth:" + mIsMiniMonth + ",mSelectedWeek:" + mSelectedWeek);
+        Log.w(TAG, "getView: ^**_**^,position:" + position + ",mIsMiniMonth:" + mIsMiniMonth + ",mAnimateToday:" + mAnimateToday + ",mSelectedWeek:" + mSelectedWeek);
         if (mIsMiniMonth) {
             return super.getView(position, convertView, parent);
         }
@@ -237,8 +237,10 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
         int selectedDay = -1;
         if (mSelectedWeek == position) {
             selectedDay = mSelectedDay.weekDay;
+            Log.d(TAG, "getView:: selectedDay:" + selectedDay);//选中本周的周几
         }
 
+        Log.d(TAG, "getView:: " + position + ",selectedDay:" + selectedDay + ",mShowWeekNumber:" + mShowWeekNumber + ",mFirstDayOfWeek:" + mFirstDayOfWeek + ",mDaysPerWeek:" + mDaysPerWeek + ",mFocusMonth:" + mFocusMonth + ",mOrientation:" + mOrientation);
         drawingParams.put(SimpleWeekView.VIEW_PARAMS_HEIGHT,
                 (parent.getHeight() + parent.getTop()) / mNumWeeks);
         drawingParams.put(SimpleWeekView.VIEW_PARAMS_SELECTED_DAY, selectedDay);
@@ -290,6 +292,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
         mShowWeekNumber = Utils.getShowWeekNumber(mContext);
         mHomeTimeZone = Utils.getTimeZone(mContext, null);
         mOrientation = mContext.getResources().getConfiguration().orientation;
+        Log.d(TAG, "refresh:: mFirstDayOfWeek:" + mFirstDayOfWeek + ",mHomeTimeZone:" + mHomeTimeZone);//周的第一天
         updateTimeZones();
         notifyDataSetChanged();
     }
