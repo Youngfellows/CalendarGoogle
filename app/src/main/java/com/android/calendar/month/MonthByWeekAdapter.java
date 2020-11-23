@@ -126,14 +126,20 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
         mSelectedDay.set(selectedTime);
         long millis = mSelectedDay.normalize(true);
         mSelectedWeek = Utils.getWeeksSinceEpochFromJulianDay(
-                Time.getJulianDay(millis, mSelectedDay.gmtoff), mFirstDayOfWeek);
+                Time.getJulianDay(millis, mSelectedDay.gmtoff), mFirstDayOfWeek);//根据时间和周的第一天,计算时间是儒略历的第几周
         Log.w(TAG, "setSelectedDay: ^**_**^,选中第mSelectedWeek:" + mSelectedWeek + "周,selectedTime:" + selectedTime);
 
         notifyDataSetChanged();
     }
 
+    /**
+     *
+     * @param firstJulianDay 查询的第一天儒略日数
+     * @param numDays  总共查询的天数
+     * @param events   日程总数
+     */
     public void setEvents(int firstJulianDay, int numDays, ArrayList<Event> events) {
-        Log.w(TAG, "setEvents: ^**_**^,firstJulianDay:" + firstJulianDay + ",numDays:" + numDays + ",events size:" + events.size());
+        Log.w(TAG, "setEvents:: ^**_**^,第一天儒略日数firstJulianDay:" + firstJulianDay + ",总共天数numDays:" + numDays + ",events size:" + events.size());
         if (mIsMiniMonth) {
             if (Log.isLoggable(TAG, Log.ERROR)) {
                 Log.e(TAG, "Attempted to set events for mini view. Events only supported in full"
@@ -141,14 +147,14 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
             }
             return;
         }
-        mEvents = events;
-        mFirstJulianDay = firstJulianDay;
-        mQueryDays = numDays;
+        mEvents = events;//日程总数
+        mFirstJulianDay = firstJulianDay;//查询的第一天儒略日数
+        mQueryDays = numDays;//总共查询的天数
         // Create a new list, this is necessary since the weeks are referencing
         // pieces of the old list
-        ArrayList<ArrayList<Event>> eventDayList = new ArrayList<ArrayList<Event>>();
+        ArrayList<ArrayList<Event>> eventDayList = new ArrayList<ArrayList<Event>>();//创建一个封装每天日程集合
         for (int i = 0; i < numDays; i++) {
-            eventDayList.add(new ArrayList<Event>());
+            eventDayList.add(new ArrayList<Event>());//57天,每天有n个日程
         }
 
         if (events == null || events.size() == 0) {
@@ -160,25 +166,30 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
             return;
         }
 
+        //计算每天日程
         // Compute the new set of days with events
         for (Event event : events) {
-            int startDay = event.startDay - mFirstJulianDay;
-            int endDay = event.endDay - mFirstJulianDay + 1;
+            int startDay = event.startDay - mFirstJulianDay;//距离第一天日程开始
+            int endDay = event.endDay - mFirstJulianDay + 1;//距离第一天日程结束
+            Log.d(TAG, "setEvents:: startDay:" + startDay + ",endDay:" + endDay + ",numDays:" + numDays);
             if (startDay < numDays || endDay >= 0) {
                 if (startDay < 0) {
-                    startDay = 0;
+                    startDay = 0;//日程开始时间小于查询第一天,从第一天开始日程
                 }
                 if (startDay > numDays) {
+                    continue;//日程开始时间超过查询总天数,跳过
+                }
+                if (endDay < 0) {//日程结束时间小于查询开始日期,跳过
                     continue;
                 }
-                if (endDay < 0) {
-                    continue;
-                }
-                if (endDay > numDays) {
+                if (endDay > numDays) {//日程结束时间超过查询总天数,赋值日程结束时间是查询总天数
                     endDay = numDays;
                 }
+                Log.d(TAG, "setEvents:: add everyday enents,startDay:" + startDay + ",endDay:" + endDay + ",numDays:" + numDays);
                 for (int j = startDay; j < endDay; j++) {
-                    eventDayList.get(j).add(event);
+                    Log.d(TAG, "setEvents:: 设置" + j + "天日程数");
+                    event.dump();
+                    eventDayList.get(j).add(event);//设置每天日程数
                 }
             }
         }
@@ -186,6 +197,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
             Log.d(TAG, "Processed " + events.size() + " events.");
         }
         mEventDayList = eventDayList;
+        Log.d(TAG, "setEvents:: mEventDayList:" + mEventDayList.size());
         refresh();
     }
 
@@ -240,7 +252,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
             Log.d(TAG, "getView:: selectedDay:" + selectedDay);//选中本周的周几
         }
 
-        Log.d(TAG, "getView:: " + position + ",selectedDay:" + selectedDay + ",mShowWeekNumber:" + mShowWeekNumber + ",mFirstDayOfWeek:" + mFirstDayOfWeek + ",mDaysPerWeek:" + mDaysPerWeek + ",mFocusMonth:" + mFocusMonth + ",mOrientation:" + mOrientation);
+        Log.d(TAG, "getView:: " + position + ",selectedDay:" + selectedDay + ",mShowWeekNumber:" + mShowWeekNumber + ",mFirstDayOfWeek:" + mFirstDayOfWeek + ",mDaysPerWeek:" + mDaysPerWeek + ",mFocusMonth:" + (mFocusMonth + 1) + ",mOrientation:" + mOrientation);
         drawingParams.put(SimpleWeekView.VIEW_PARAMS_HEIGHT,
                 (parent.getHeight() + parent.getTop()) / mNumWeeks);
         drawingParams.put(SimpleWeekView.VIEW_PARAMS_SELECTED_DAY, selectedDay);
@@ -262,12 +274,13 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
     }
 
     private void sendEventsToView(MonthWeekEventsView v) {
-        Log.w(TAG, "sendEventsToView: ^**_**^ ");
+        Log.w(TAG, "sendEventsToView: ^**_**^,mEventDayList.size():" + mEventDayList.size());
 
         if (mEventDayList.size() == 0) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "No events loaded, did not pass any events to view.");
             }
+            Log.d(TAG, "sendEventsToView:: No events loaded, did not pass any events to view.");
             v.setEvents(null, null);
             return;
         }
@@ -279,10 +292,13 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
                 Log.d(TAG, "Week is outside range of loaded events. viewStart: " + viewJulianDay
                         + " eventsStart: " + mFirstJulianDay);
             }
+            Log.d(TAG, "sendEventsToView:: Week is outside range of loaded events. viewStart: " + viewJulianDay
+                    + " eventsStart: " + mFirstJulianDay);
             v.setEvents(null, null);
             return;
         }
-        v.setEvents(mEventDayList.subList(start, end), mEvents);
+        Log.d(TAG, "sendEventsToView:: start:" + start + ",end:" + end + ",mEvents:" + mEvents.size());
+        v.setEvents(mEventDayList.subList(start, end), mEvents);//设置每个条目一周的日程
     }
 
     @Override

@@ -548,22 +548,54 @@ public class Event implements Cloneable {
     }
 
     public final void dump() {
-        Log.e("Cal", "+-----------------------------------------+");
-        Log.e("Cal", "+        id = " + id);
-        Log.e("Cal", "+     color = " + color);
-        Log.e("Cal", "+     title = " + title);
-        Log.e("Cal", "+  location = " + location);
-        Log.e("Cal", "+    allDay = " + allDay);
-        Log.e("Cal", "+  startDay = " + startDay);
-        Log.e("Cal", "+    endDay = " + endDay);
-        Log.e("Cal", "+ startTime = " + startTime);
-        Log.e("Cal", "+   endTime = " + endTime);
-        Log.e("Cal", "+ organizer = " + organizer);
-        Log.e("Cal", "+  guestwrt = " + guestsCanModify);
+        Log.e(TAG, "+-----------------------------------------+");
+        Log.e(TAG, "+        id = " + id);
+        Log.e(TAG, "+     color = " + color);
+        Log.e(TAG, "+     title = " + title);
+        Log.e(TAG, "+  location = " + location);
+        Log.e(TAG, "+    allDay = " + allDay);
+        Log.e(TAG, "+  startDay = " + startDay);
+        Log.e(TAG, "+    endDay = " + endDay);
+        Log.e(TAG, "+ startTime = " + startTime);
+        Log.e(TAG, "+   endTime = " + endTime);
+        Log.e(TAG, "+ organizer = " + organizer);
+        Log.e(TAG, "+  guestwrt = " + guestsCanModify);
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "id=" + id +
+                ", color=" + color +
+                ", title=" + title +
+                ", location=" + location +
+                ", allDay=" + allDay +
+                ", organizer='" + organizer + '\'' +
+                ", guestsCanModify=" + guestsCanModify +
+                ", startDay=" + startDay +
+                ", endDay=" + endDay +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", startMillis=" + startMillis +
+                ", endMillis=" + endMillis +
+                ", mColumn=" + mColumn +
+                ", mMaxColumns=" + mMaxColumns +
+                ", hasAlarm=" + hasAlarm +
+                ", isRepeating=" + isRepeating +
+                ", selfAttendeeStatus=" + selfAttendeeStatus +
+                ", left=" + left +
+                ", right=" + right +
+                ", top=" + top +
+                ", bottom=" + bottom +
+                ", nextRight=" + nextRight +
+                ", nextLeft=" + nextLeft +
+                ", nextUp=" + nextUp +
+                ", nextDown=" + nextDown +
+                '}';
     }
 
     public final boolean intersects(int julianDay, int startMinute,
-            int endMinute) {
+                                    int endMinute) {
         if (endDay < julianDay) {
             return false;
         }

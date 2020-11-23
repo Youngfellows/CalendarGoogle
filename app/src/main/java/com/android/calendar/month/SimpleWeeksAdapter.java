@@ -255,6 +255,7 @@ public class SimpleWeeksAdapter extends BaseAdapter implements OnTouchListener {
      * @param month The month to show as in focus [0-11]
      */
     public void updateFocusMonth(int month) {
+        Log.w(TAG, Log.getStackTraceString(new IllegalArgumentException("聚焦在" + (month + 1) + "月")));
         mFocusMonth = month;
         notifyDataSetChanged();
     }

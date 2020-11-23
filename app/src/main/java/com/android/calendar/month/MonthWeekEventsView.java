@@ -55,7 +55,7 @@ import java.util.Locale;
 
 public class MonthWeekEventsView extends SimpleWeekView {
 
-    private static final String TAG = "MonthView";
+    //private static final String TAG = "MonthView";
 
     private static final boolean DEBUG_LAYOUT = true;
 
@@ -251,6 +251,7 @@ public class MonthWeekEventsView extends SimpleWeekView {
         super(context);
     }
 
+    //设置每个条目一周的日程
     // Sets the list of events for this week. Takes a sorted list of arrays
     // divided up by day for generating the large month version and the full
     // arraylist sorted by start time to generate the dna version.
@@ -299,6 +300,7 @@ public class MonthWeekEventsView extends SimpleWeekView {
         }
     }
 
+    //设置每个条目一周的日程
     public void setEvents(List<ArrayList<Event>> sortedEvents) {
         mEvents = sortedEvents;
         if (sortedEvents == null) {
@@ -494,7 +496,7 @@ public class MonthWeekEventsView extends SimpleWeekView {
             mOrientation = params.get(VIEW_PARAMS_ORIENTATION);
         }
 
-        updateToday(tz);
+        updateToday(tz);//更新今天时间日期
         mNumCells = mNumDays + 1;
 
         if (params.containsKey(VIEW_PARAMS_ANIMATE_TODAY) && mHasToday) {
@@ -516,17 +518,18 @@ public class MonthWeekEventsView extends SimpleWeekView {
     }
 
     /**
+     * 更新今天时间日期
      * @param tz
      */
     public boolean updateToday(String tz) {
         mToday.timezone = tz;
         mToday.setToNow();
         mToday.normalize(true);
-        int julianToday = Time.getJulianDay(mToday.toMillis(false), mToday.gmtoff);
-        if (julianToday >= mFirstJulianDay && julianToday < mFirstJulianDay + mNumDays) {
+        int julianToday = Time.getJulianDay(mToday.toMillis(false), mToday.gmtoff);//今天的儒略日数
+        if (julianToday >= mFirstJulianDay && julianToday < mFirstJulianDay + mNumDays) {//该条目存在今天
             mHasToday = true;
-            mTodayIndex = julianToday - mFirstJulianDay;
-        } else {
+            mTodayIndex = julianToday - mFirstJulianDay;//今天在条目第几个索引
+        } else {//该条目没有今天
             mHasToday = false;
             mTodayIndex = -1;
         }

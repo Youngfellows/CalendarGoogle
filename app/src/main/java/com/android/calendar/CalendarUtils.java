@@ -185,6 +185,7 @@ public class CalendarUtils {
                 date = DateUtils.formatDateRange(context, mF, startMillis, endMillis, flags,
                         tz).toString();
             }
+            Log.d(TAG, "formatDateRange:: date:" + date);
             return date;
         }
 

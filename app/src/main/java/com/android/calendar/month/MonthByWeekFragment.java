@@ -118,15 +118,15 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
     private final Runnable mTZUpdater = new Runnable() {
         @Override
         public void run() {
-            String tz = Utils.getTimeZone(mContext, mTZUpdater);
+            String tz = Utils.getTimeZone(mContext, mTZUpdater);//获取当前设置的时区
             Log.d(TAG, "mTZUpdater run:: tz:" + tz);
             mSelectedDay.timezone = tz;
-            mSelectedDay.normalize(true);
-            mTempTime.timezone = tz;
-            mFirstDayOfMonth.timezone = tz;
+            mSelectedDay.normalize(true);//高亮选中的哪一天
+            mTempTime.timezone = tz;//用于计算时间的临时变量
+            mFirstDayOfMonth.timezone = tz;//聚焦在当前月的第一天
             mFirstDayOfMonth.normalize(true);
             mFirstVisibleDay.timezone = tz;
-            mFirstVisibleDay.normalize(true);
+            mFirstVisibleDay.normalize(true);//视图中可见第一天
             if (mAdapter != null) {
                 mAdapter.refresh();
             }
@@ -179,7 +179,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
         SimpleWeekView child = (SimpleWeekView) mListView.getChildAt(0);
         Log.d(TAG, "updateUri:: child:" + child);
         if (child != null) {
-            int julianDay = child.getFirstJulianDay();
+            int julianDay = child.getFirstJulianDay();//获取查询的第一天儒略日,比如2020年10月31日,2459154
             mFirstLoadedJulianDay = julianDay;
         }
         // -1 to ensure we get all day events from any time zone
@@ -389,14 +389,14 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
 
     @Override
     public void doResumeUpdates() {
-        mFirstDayOfWeek = Utils.getFirstDayOfWeek(mContext);
-        mShowWeekNumber = Utils.getShowWeekNumber(mContext);
+        mFirstDayOfWeek = Utils.getFirstDayOfWeek(mContext);//周的第一天
+        mShowWeekNumber = Utils.getShowWeekNumber(mContext);//是否显示周数
         boolean prevHideDeclined = mHideDeclined;
         mHideDeclined = Utils.getHideDeclinedEvents(mContext);
         if (prevHideDeclined != mHideDeclined && mLoader != null) {
             mLoader.setSelection(updateWhere());
         }
-        mDaysPerWeek = Utils.getDaysPerWeek(mContext);
+        mDaysPerWeek = Utils.getDaysPerWeek(mContext);//每周几天
         updateHeader();
         mAdapter.setSelectedDay(mSelectedDay);//高亮选中当前天
         mTZUpdater.run();
@@ -427,7 +427,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
             Event.buildEventsFromCursor(
                     events, data, mContext, mFirstLoadedJulianDay, mLastLoadedJulianDay);
             ((MonthByWeekAdapter) mAdapter).setEvents(mFirstLoadedJulianDay,
-                    mLastLoadedJulianDay - mFirstLoadedJulianDay + 1, events);
+                    mLastLoadedJulianDay - mFirstLoadedJulianDay + 1, events);//设置日程列表
         }
     }
 

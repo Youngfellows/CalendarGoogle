@@ -101,15 +101,15 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
     protected String[] mDayLabels;
 
     // disposable variable used for time calculations
-    protected Time mTempTime = new Time();
+    protected Time mTempTime = new Time();//用于计算时间的临时变量
 
     private static float mScale = 0;
     // When the week starts; numbered like Time.<WEEKDAY> (e.g. SUNDAY=0).
     protected int mFirstDayOfWeek;
     // The first day of the focus month
-    protected Time mFirstDayOfMonth = new Time();
+    protected Time mFirstDayOfMonth = new Time();//聚焦在当前月的第一天
     // The first day that is visible in the view
-    protected Time mFirstVisibleDay = new Time();
+    protected Time mFirstVisibleDay = new Time();//视图中可见第一天
     // The name of the month to display
     protected TextView mMonthName;
     // The last name announced by accessibility
@@ -465,11 +465,12 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "GoTo position " + position);
         }
+        Log.d(TAG, "goto:: position:" + position + ",firstPosition:" + firstPosition + ",lastPosition:" + lastPosition + ",forceScroll:" + forceScroll);
         // Check if the selected day is now outside of our visible range
         // and if so scroll to the month that contains it
         if (position < firstPosition || position > lastPosition || forceScroll) {
-            mFirstDayOfMonth.set(mTempTime);
-            mFirstDayOfMonth.monthDay = 1;
+            mFirstDayOfMonth.set(mTempTime);//用于计算时间的临时变量
+            mFirstDayOfMonth.monthDay = 1;//聚焦在当前的第一天
             millis = mFirstDayOfMonth.normalize(true);
             setMonthDisplayed(mFirstDayOfMonth, true);
             position = Utils.getWeeksSinceEpochFromJulianDay(
@@ -588,12 +589,13 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
      */
     protected void setMonthDisplayed(Time time, boolean updateHighlight) {
         CharSequence oldMonth = mMonthName.getText();
-        mMonthName.setText(Utils.formatMonthYear(mContext, time));
+        mMonthName.setText(Utils.formatMonthYear(mContext, time));//获取当前月份
         mMonthName.invalidate();
         if (!TextUtils.equals(oldMonth, mMonthName.getText())) {
             mMonthName.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
         }
-        mCurrentMonthDisplayed = time.month;
+        mCurrentMonthDisplayed = time.month;//当前月份
+        Log.d(TAG, "setMonthDisplayed:: 当前月份,mCurrentMonthDisplayed:" + (mCurrentMonthDisplayed + 1));
         if (updateHighlight) {
             mAdapter.updateFocusMonth(mCurrentMonthDisplayed);
         }

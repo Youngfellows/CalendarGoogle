@@ -30,6 +30,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -47,7 +48,7 @@ import java.util.HashMap;
  * </p>
  */
 public class SimpleWeekView extends View {
-    private static final String TAG = "MonthView";
+    protected String TAG = this.getClass().getSimpleName();
 
     /**
      * These params can be passed into the view to control how it appears.
@@ -219,33 +220,34 @@ public class SimpleWeekView extends View {
         if (params.containsKey(VIEW_PARAMS_HEIGHT)) {
             mHeight = params.get(VIEW_PARAMS_HEIGHT);
             if (mHeight < MIN_HEIGHT) {
-                mHeight = MIN_HEIGHT;
+                mHeight = MIN_HEIGHT;//条目高度
             }
         }
         if (params.containsKey(VIEW_PARAMS_SELECTED_DAY)) {
-            mSelectedDay = params.get(VIEW_PARAMS_SELECTED_DAY);
+            mSelectedDay = params.get(VIEW_PARAMS_SELECTED_DAY);//是否高亮选中的一天,-1不选中
         }
-        mHasSelectedDay = mSelectedDay != -1;
+        mHasSelectedDay = mSelectedDay != -1;//是否高亮选中的一天
         if (params.containsKey(VIEW_PARAMS_NUM_DAYS)) {
-            mNumDays = params.get(VIEW_PARAMS_NUM_DAYS);
+            mNumDays = params.get(VIEW_PARAMS_NUM_DAYS);//每周显示7天
         }
         if (params.containsKey(VIEW_PARAMS_SHOW_WK_NUM)) {
             if (params.get(VIEW_PARAMS_SHOW_WK_NUM) != 0) {
-                mShowWeekNum = true;
+                mShowWeekNum = true;//显示周数
             } else {
-                mShowWeekNum = false;
+                mShowWeekNum = false;//不显示周数
             }
         }
-        mNumCells = mShowWeekNum ? mNumDays + 1 : mNumDays;
+        mNumCells = mShowWeekNum ? mNumDays + 1 : mNumDays;//每个条目应该绘制多少个单元格,显示周数,绘制8个单元格,否则绘制7个单元格
 
         // Allocate space for caching the day numbers and focus values
-        mDayNumbers = new String[mNumCells];
-        mFocusDay = new boolean[mNumCells];
-        mOddMonth = new boolean[mNumCells];
-        mWeek = params.get(VIEW_PARAMS_WEEK);
-        int julianMonday = Utils.getJulianMondayFromWeeksSinceEpoch(mWeek);
+        mDayNumbers = new String[mNumCells];//保存一周单元格日期(每月几号)
+        mFocusDay = new boolean[mNumCells];//保存一周单元格是否是聚焦月
+        mOddMonth = new boolean[mNumCells];//保存一周单元格是否是奇数月
+        mWeek = params.get(VIEW_PARAMS_WEEK);//条目位置,即第xx周
+        int julianMonday = Utils.getJulianMondayFromWeeksSinceEpoch(mWeek);//根据周数获取儒略历的星期一的儒略日
         Time time = new Time(tz);
         time.setJulianDay(julianMonday);
+        Log.d(TAG, "setWeekParams:: mWeek:" + mWeek + ",julianMonday:" + julianMonday + ",一年中的第:" + time.getWeekNumber() + "周");
 
         // If we're showing the week number calculate it based on Monday
         int i = 0;
@@ -255,58 +257,66 @@ public class SimpleWeekView extends View {
         }
 
         if (params.containsKey(VIEW_PARAMS_WEEK_START)) {
-            mWeekStart = params.get(VIEW_PARAMS_WEEK_START);
+            mWeekStart = params.get(VIEW_PARAMS_WEEK_START);//一周的起始日
         }
+        Log.d(TAG, "setWeekParams:: mWeekStart:" + mWeekStart + ",time.weekDay:" + time.weekDay);
 
         // Now adjust our starting day based on the start day of the week
         // If the week is set to start on a Saturday the first week will be
         // Dec 27th 1969 -Jan 2nd, 1970
-        if (time.weekDay != mWeekStart) {
+        if (time.weekDay != mWeekStart) {//一周起始日不是星期一,调整一周的开始日期
             int diff = time.weekDay - mWeekStart;
             if (diff < 0) {
-                diff += 7;
+                diff += 7;//相差多少天
             }
-            time.monthDay -= diff;
+            time.monthDay -= diff;//调整一周的开始日期,往前移动1天或者2天
             time.normalize(true);
         }
 
+        //调整后的周的起始日和起始月
         mFirstJulianDay = Time.getJulianDay(time.toMillis(true), time.gmtoff);
         mFirstMonth = time.month;
+        Log.d(TAG, "setWeekParams:: 调整后的周的起始日,mFirstJulianDay:" + mFirstJulianDay + ",起始月,mFirstMonth:" + (mFirstMonth + 1));
 
         // Figure out what day today is
-        Time today = new Time(tz);
+        Time today = new Time(tz);//今天的时间日期
         today.setToNow();
-        mHasToday = false;
-        mToday = -1;
+        mHasToday = false;//是否今天
+        mToday = -1;//今天是第几个单元格
 
         int focusMonth = params.containsKey(VIEW_PARAMS_FOCUS_MONTH) ? params.get(
                 VIEW_PARAMS_FOCUS_MONTH)
                 : DEFAULT_FOCUS_MONTH;
+        Log.d(TAG, "setWeekParams:: 调整后的,聚焦月份,focusMonth:" + (focusMonth + 1) + ",time.monthDay:" + time.monthDay + ",time.month:" + (time.month + 1));
 
         for (; i < mNumCells; i++) {
-            if (time.monthDay == 1) {
+            if (time.monthDay == 1) {//今天是1号
                 mFirstMonth = time.month;
             }
-            mOddMonth [i] = (time.month %2) == 1;
+            mOddMonth [i] = (time.month %2) == 1;//每个单元格是否是奇数月
             if (time.month == focusMonth) {
-                mFocusDay[i] = true;
+                mFocusDay[i] = true;//每个单元格是聚焦的月份
             } else {
-                mFocusDay[i] = false;
+                mFocusDay[i] = false;//每个单元格不是聚焦的月份
             }
             if (time.year == today.year && time.yearDay == today.yearDay) {
-                mHasToday = true;
+                mHasToday = true;//单元格是今天
                 mToday = i;
             }
-            mDayNumbers[i] = Integer.toString(time.monthDay++);
+            Log.d(TAG, "setWeekParams:: " + (time.month + 1) + "月" + time.monthDay + "日,是否聚焦:" + mFocusDay[i] + ",是否奇数月:" + mOddMonth[i]);
+
+            mDayNumbers[i] = Integer.toString(time.monthDay++);//保存单元格日期,每月几号
             time.normalize(true);
+
         }
+
         // We do one extra add at the end of the loop, if that pushed us to a
         // new month undo it
-        if (time.monthDay == 1) {
+        if (time.monthDay == 1) {//如果是下个月1号,往前移动一个月
             time.monthDay--;
             time.normalize(true);
         }
-        mLastMonth = time.month;
+        mLastMonth = time.month;//保存上个月
 
         updateSelectionPositions();
     }
