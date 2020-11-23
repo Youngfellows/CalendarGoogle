@@ -17,6 +17,7 @@
 package com.android.calendar.agenda;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -93,6 +94,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
 
     // timeMillis - time of first event to show
     // usedForSearch - indicates if this fragment is used in the search fragment
+    @SuppressLint("ValidFragment")
     public AgendaFragment(long timeMillis, boolean usedForSearch) {
         mInitialTimeMillis = timeMillis;
         mTime = new Time();
