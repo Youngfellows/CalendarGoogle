@@ -51,7 +51,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
         OnScrollListener {
 
     private static final String TAG = AgendaFragment.class.getSimpleName();
-    private static boolean DEBUG = false;
+    private static boolean DEBUG = true;
 
     protected static final String BUNDLE_KEY_RESTORE_TIME = "key_restore_time";
     protected static final String BUNDLE_KEY_RESTORE_INSTANCE_ID = "key_restore_instance_id";
@@ -112,6 +112,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        Log.w(TAG, "onAttach:: mOnAttachedInfo:" + mOnAttachedInfo);
         mTimeZone = Utils.getTimeZone(activity, mTZUpdater);
         mTime.switchTimezone(mTimeZone);
         mActivity = activity;
@@ -124,6 +125,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        Log.w(TAG, "onCreate:: ");
         mController = CalendarController.getInstance(mActivity);
         mShowEventDetailsWithAgenda =
             Utils.getConfigBool(mActivity, R.bool.show_event_details_with_agenda);
@@ -143,7 +145,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-
+        Log.w(TAG, "onCreateView:: ");
 
         int screenWidth = mActivity.getResources().getDisplayMetrics().widthPixels;
         View v = inflater.inflate(R.layout.agenda_fragment, null);
@@ -214,7 +216,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     public void onResume() {
         super.onResume();
         if (DEBUG) {
-            Log.v(TAG, "OnResume to " + mTime.toString());
+            Log.w(TAG, "OnResume to " + mTime.toString());
         }
 
         SharedPreferences prefs = GeneralPreferences.getSharedPreferences(
@@ -245,6 +247,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        Log.w(TAG, "onSaveInstanceState:: mAgendaListView:" + mAgendaListView);
         if (mAgendaListView == null) {
             return;
         }
@@ -306,7 +309,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     @Override
     public void onPause() {
         super.onPause();
-
+        Log.w(TAG, "onPause:: ");
         mAgendaListView.onPause();
 
 //        mContentResolver.unregisterContentObserver(mObserver);
@@ -351,6 +354,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
 
     @Override
     public void eventsChanged() {
+        Log.w(TAG, "eventsChanged:: ");
         if (mAgendaListView != null) {
             mAgendaListView.refresh(true);
         }
@@ -365,6 +369,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     private Time mLastHandledEventTime = null;
     @Override
     public void handleEvent(EventInfo event) {
+        Log.w(TAG, "handleEvent:: event.eventType:" + event.eventType);
         if (event.eventType == EventType.GO_TO) {
             // TODO support a range of time
             // TODO support event_id
@@ -442,6 +447,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
 
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
+        Log.w(TAG, "onScrollStateChanged:: ");
         // Save scroll state so that the adapter can stop the scroll when the
         // agenda list is fling state and it needs to set the agenda list to a new position
         if (mAdapter != null) {
@@ -454,6 +460,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
             int totalItemCount) {
+        Log.w(TAG, "onScroll:: ");
         int julianDay = mAgendaListView.getJulianDayFromPosition(firstVisibleItem
                 - mAgendaListView.getHeaderViewsCount());
         // On error - leave the old view
