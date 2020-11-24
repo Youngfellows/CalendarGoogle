@@ -19,6 +19,7 @@ package com.android.calendar;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,8 +63,8 @@ public class StickyHeaderListView extends FrameLayout implements OnScrollListene
     protected ListView mListView = null;
     protected OnScrollListener mListener = null;
 
-    private int mSeparatorWidth;
-    private View mSeparatorView;
+    private int mSeparatorWidth;//头部分割线高度
+    private View mSeparatorView;//头部分割线
     private int mLastStickyHeaderHeight = 0;
 
     // This code is needed only if dataset changes do not force a call to OnScroll
@@ -198,6 +199,7 @@ public class StickyHeaderListView extends FrameLayout implements OnScrollListene
     public StickyHeaderListView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
+        Log.d(TAG, "StickyHeaderListView:: ");
         // This code is needed only if dataset changes do not force a call to OnScroll
         // createDataListener();
      }
@@ -227,7 +229,7 @@ public class StickyHeaderListView extends FrameLayout implements OnScrollListene
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
             int totalItemCount) {
-
+        Log.d(TAG, "onScroll:: firstVisibleItem:" + firstVisibleItem + ",visibleItemCount:" + visibleItemCount + ",totalItemCount:" + totalItemCount);
         updateStickyHeader(firstVisibleItem);
 
         if (mListener != null) {
@@ -251,6 +253,10 @@ public class StickyHeaderListView extends FrameLayout implements OnScrollListene
         this.addView(mSeparatorView);
     }
 
+    /**
+     * 滚动时,更新粘滞头部
+     * @param firstVisibleItem
+     */
     protected void updateStickyHeader(int firstVisibleItem) {
 
         // Try to make sure we have an adapter to work with (may not succeed).
@@ -344,6 +350,7 @@ public class StickyHeaderListView extends FrameLayout implements OnScrollListene
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        Log.d(TAG, "onFinishInflate:: mChildViewsCreated:" + mChildViewsCreated);
         if (!mChildViewsCreated) {
             setChildViews();
         }
@@ -353,6 +360,7 @@ public class StickyHeaderListView extends FrameLayout implements OnScrollListene
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        Log.d(TAG, "onAttachedToWindow:: mChildViewsCreated:" + mChildViewsCreated);
         if (!mChildViewsCreated) {
             setChildViews();
         }

@@ -41,7 +41,7 @@ import android.widget.TextView;
 public class AgendaListView extends ListView implements OnItemClickListener {
 
     private static final String TAG = "AgendaListView";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final int EVENT_UPDATE_TIME = 300000;  // 5 minutes
 
     private AgendaWindowAdapter mWindowAdapter;
@@ -70,6 +70,7 @@ public class AgendaListView extends ListView implements OnItemClickListener {
         }
     };
 
+    //过去日程事件
     // Runs every EVENT_UPDATE_TIME to gray out past events
     private final Runnable mPastEventUpdater = new Runnable() {
         @Override
@@ -88,14 +89,14 @@ public class AgendaListView extends ListView implements OnItemClickListener {
 
     private void initView(Context context) {
         mContext = context;
-        mTimeZone = Utils.getTimeZone(context, mTZUpdater);
-        mTime = new Time(mTimeZone);
+        mTimeZone = Utils.getTimeZone(context, mTZUpdater);//获取时区
+        mTime = new Time(mTimeZone);//当前时间日期
         setOnItemClickListener(this);
         setVerticalScrollBarEnabled(false);
         mWindowAdapter = new AgendaWindowAdapter(context, this,
                 Utils.getConfigBool(context, R.bool.show_event_details_with_agenda));
         mWindowAdapter.setSelectedInstanceId(-1/* TODO:instanceId */);
-        setAdapter(mWindowAdapter);
+        setAdapter(mWindowAdapter); //设置日程列表事件适配器
         setCacheColorHint(context.getResources().getColor(R.color.agenda_item_not_selected));
         mDeleteEventHelper =
                 new DeleteEventHelper(context, null, false /* don't exit when done */);
@@ -205,8 +206,10 @@ public class AgendaListView extends ListView implements OnItemClickListener {
         }
     }
 
-    public void goTo(Time time, long id, String searchQuery, boolean forced,
-            boolean refreshEventInfo) {
+    //查询日程列表
+    public void goTo(Time time, long id, String searchQuery, boolean forced, boolean refreshEventInfo) {
+        Log.d(TAG, "goTo:: id:" + id + ",forced:" + forced + ",refreshEventInfo:" + refreshEventInfo + ",time:" + time);
+        Log.d(TAG, "goTo:: searchQuery:" + searchQuery);
         if (time == null) {
             time = mTime;
             long goToTime = getFirstVisibleTime(null);

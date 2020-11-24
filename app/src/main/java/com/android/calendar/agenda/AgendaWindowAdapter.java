@@ -74,16 +74,16 @@ Check for leaks and excessive allocations
  */
 
 public class AgendaWindowAdapter extends BaseAdapter
-    implements StickyHeaderListView.HeaderIndexer, StickyHeaderListView.HeaderHeightListener{
+        implements StickyHeaderListView.HeaderIndexer, StickyHeaderListView.HeaderHeightListener {
 
-    static final boolean BASICLOG = false;
-    static final boolean DEBUGLOG = false;
+    static final boolean BASICLOG = true;
+    static final boolean DEBUGLOG = true;
     private static final String TAG = "AgendaWindowAdapter";
 
     private static final String AGENDA_SORT_ORDER =
             Instances.START_DAY + " ASC, " +
-            Instances.BEGIN + " ASC, " +
-            CalendarContract.Events.TITLE + " ASC";
+                    Instances.BEGIN + " ASC, " +
+                    CalendarContract.Events.TITLE + " ASC";
 
     public static final int INDEX_INSTANCE_ID = 0;
     public static final int INDEX_TITLE = 1;
@@ -100,10 +100,10 @@ public class AgendaWindowAdapter extends BaseAdapter
     public static final int INDEX_SELF_ATTENDEE_STATUS = 12;
     public static final int INDEX_ORGANIZER = 13;
     public static final int INDEX_OWNER_ACCOUNT = 14;
-    public static final int INDEX_CAN_ORGANIZER_RESPOND= 15;
+    public static final int INDEX_CAN_ORGANIZER_RESPOND = 15;
     public static final int INDEX_TIME_ZONE = 16;
 
-    private static final String[] PROJECTION = new String[] {
+    private static final String[] PROJECTION = new String[]{
             Instances._ID, // 0
             Instances.TITLE, // 1
             Instances.EVENT_LOCATION, // 2
@@ -139,7 +139,9 @@ public class AgendaWindowAdapter extends BaseAdapter
     private static final int MAX_QUERY_DURATION = 60; // days
     private static final int PREFETCH_BOUNDARY = 1;
 
-    /** Times to auto-expand/retry query after getting no data */
+    /**
+     * Times to auto-expand/retry query after getting no data
+     */
     private static final int RETRIES_ON_NO_DATA = 1;
 
     private final Context mContext;
@@ -147,13 +149,19 @@ public class AgendaWindowAdapter extends BaseAdapter
     private final QueryHandler mQueryHandler;
     private final AgendaListView mAgendaListView;
 
-    /** The sum of the rows in all the adapters */
+    /**
+     * The sum of the rows in all the adapters
+     */
     private int mRowCount;
 
-    /** The number of times we have queried and gotten no results back */
+    /**
+     * The number of times we have queried and gotten no results back
+     */
     private int mEmptyCursorCount;
 
-    /** Cached value of the last used adapter */
+    /**
+     * Cached value of the last used adapter
+     */
     private DayAdapterInfo mLastUsedInfo;
 
     private final LinkedList<DayAdapterInfo> mAdapterInfos =
@@ -176,7 +184,9 @@ public class AgendaWindowAdapter extends BaseAdapter
      */
     private int mOlderRequests;
 
-    /** Number of "older" query that has been processed. */
+    /**
+     * Number of "older" query that has been processed.
+     */
     private int mOlderRequestsProcessed;
 
     /**
@@ -186,7 +196,9 @@ public class AgendaWindowAdapter extends BaseAdapter
      */
     private int mNewerRequests;
 
-    /** Number of "newer" query that has been processed. */
+    /**
+     * Number of "newer" query that has been processed.
+     */
     private int mNewerRequestsProcessed;
 
     // Note: Formatter is not thread safe. Fine for now as it is only used by the main thread.
@@ -219,7 +231,9 @@ public class AgendaWindowAdapter extends BaseAdapter
     // Used to stop a fling motion if the ListView is set to a specific position
     int mListViewScrollState = OnScrollListener.SCROLL_STATE_IDLE;
 
-    /** The current search query, or null if none */
+    /**
+     * The current search query, or null if none
+     */
     private String mSearchQuery;
 
     private long mSelectedInstanceId = -1;
@@ -262,7 +276,7 @@ public class AgendaWindowAdapter extends BaseAdapter
                 long goToTimeMillis = goToTime.toMillis(false);
                 result = prime * result + (int) (goToTimeMillis ^ (goToTimeMillis >>> 32));
             }
-            result = prime * result + (int)id;
+            result = prime * result + (int) id;
             return result;
         }
 
@@ -294,7 +308,7 @@ public class AgendaWindowAdapter extends BaseAdapter
     /**
      * Class representing a list item within the Agenda view.  Could be either an instance of an
      * event, or a header marking the specific day.
-     *
+     * <p>
      * The begin and end times of an AgendaItem should always be in local time, even if the event
      * is all day.  buildAgendaItemFromCursor() converts each event to local time.
      */
@@ -337,7 +351,7 @@ public class AgendaWindowAdapter extends BaseAdapter
     }
 
     public AgendaWindowAdapter(Context context,
-            AgendaListView agendaListView, boolean showEventOnStart) {
+                               AgendaListView agendaListView, boolean showEventOnStart) {
         mContext = context;
         mResources = context.getResources();
         mSelectedItemBackgroundColor = mResources
@@ -348,7 +362,7 @@ public class AgendaWindowAdapter extends BaseAdapter
 
         mTimeZone = Utils.getTimeZone(context, mTZUpdater);
         mAgendaListView = agendaListView;
-        mQueryHandler = new QueryHandler(context.getContentResolver());
+        mQueryHandler = new QueryHandler(context.getContentResolver());//异步查询帮助类
 
         mStringBuilder = new StringBuilder(50);
         mFormatter = new Formatter(mStringBuilder, Locale.getDefault());
@@ -363,8 +377,8 @@ public class AgendaWindowAdapter extends BaseAdapter
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mHeaderView = (TextView)inflater.inflate(R.layout.agenda_header_footer, null);
-        mFooterView = (TextView)inflater.inflate(R.layout.agenda_header_footer, null);
+        mHeaderView = (TextView) inflater.inflate(R.layout.agenda_header_footer, null);
+        mFooterView = (TextView) inflater.inflate(R.layout.agenda_header_footer, null);
         mHeaderView.setText(R.string.loading);
         mAgendaListView.addHeaderView(mHeaderView);
     }
@@ -437,7 +451,7 @@ public class AgendaWindowAdapter extends BaseAdapter
             if (curPos >= 0) {
                 info.cursor.moveToPosition(curPos);
                 return info.cursor.getLong(AgendaWindowAdapter.INDEX_EVENT_ID) << 20 +
-                    info.cursor.getLong(AgendaWindowAdapter.INDEX_BEGIN);
+                        info.cursor.getLong(AgendaWindowAdapter.INDEX_BEGIN);
             }
             // Day Header
             return info.dayAdapter.findJulianDayFromPosition(position);
@@ -507,7 +521,7 @@ public class AgendaWindowAdapter extends BaseAdapter
                     View.VISIBLE : View.GONE);
             if (mShowEventOnStart) {
                 GridLayout.LayoutParams lp =
-                        (GridLayout.LayoutParams)vh.textContainer.getLayoutParams();
+                        (GridLayout.LayoutParams) vh.textContainer.getLayoutParams();
                 if (selected) {
                     mSelectedVH = vh;
                     v.setBackgroundColor(mSelectedItemBackgroundColor);
@@ -517,7 +531,7 @@ public class AgendaWindowAdapter extends BaseAdapter
                     lp.setMargins(0, 0, 0, 0);
                     vh.textContainer.setLayoutParams(lp);
                 } else {
-                    lp.setMargins(0, 0, (int)mItemRightMargin, 0);
+                    lp.setMargins(0, 0, (int) mItemRightMargin, 0);
                     vh.textContainer.setLayoutParams(lp);
                 }
             }
@@ -580,14 +594,15 @@ public class AgendaWindowAdapter extends BaseAdapter
 
     /**
      * Return the event info for a given position in the adapter
+     *
      * @param positionInListView
      * @param returnEventStartDay If true, return actual event startday. Otherwise
-     *        return agenda date-header date as the startDay.
-     *        The two will differ for multi-day events after the first day.
+     *                            return agenda date-header date as the startDay.
+     *                            The two will differ for multi-day events after the first day.
      * @return
      */
     public AgendaItem getAgendaItemByPosition(final int positionInListView,
-            boolean returnEventStartDay) {
+                                              boolean returnEventStartDay) {
         if (DEBUGLOG) Log.e(TAG, "getEventByPosition " + positionInListView);
         if (positionInListView < 0) {
             return null;
@@ -622,7 +637,7 @@ public class AgendaWindowAdapter extends BaseAdapter
     }
 
     private AgendaItem buildAgendaItemFromCursor(final Cursor cursor, int cursorPosition,
-            boolean isDayHeader) {
+                                                 boolean isDayHeader) {
         if (cursorPosition == -1) {
             cursor.moveToFirst();
         } else {
@@ -675,15 +690,16 @@ public class AgendaWindowAdapter extends BaseAdapter
             Log.d(TAG, "Sent (AgendaWindowAdapter): VIEW EVENT: " + new Date(startTime));
         }
         CalendarController.getInstance(mContext)
-        .sendEventRelatedEventWithExtra(this, EventType.VIEW_EVENT,
-                item.id, startTime, endTime, 0,
-                0, CalendarController.EventInfo.buildViewExtraLong(
-                        Attendees.ATTENDEE_STATUS_NONE,
-                        item.allDay), selectedTime);
+                .sendEventRelatedEventWithExtra(this, EventType.VIEW_EVENT,
+                        item.id, startTime, endTime, 0,
+                        0, CalendarController.EventInfo.buildViewExtraLong(
+                                Attendees.ATTENDEE_STATUS_NONE,
+                                item.allDay), selectedTime);
     }
 
+    //异步加载日程列表
     public void refresh(Time goToTime, long id, String searchQuery, boolean forced,
-            boolean refreshEventInfo) {
+                        boolean refreshEventInfo) {
         if (searchQuery != null) {
             mSearchQuery = searchQuery;
         }
@@ -695,7 +711,10 @@ public class AgendaWindowAdapter extends BaseAdapter
                     + (refreshEventInfo ? " refresh event info" : ""));
         }
 
+        //查询日程的儒略历日开始时间
         int startDay = Time.getJulianDay(goToTime.toMillis(false), goToTime.gmtoff);
+        Log.d(TAG, "refresh:: id:" + id + ",forced:" + forced + ",refreshEventInfo:" + refreshEventInfo + ",startDay:" + startDay + ",goToTime:" + goToTime);
+        Log.d(TAG, "refresh:: searchQuery:" + searchQuery);
 
         if (!forced && isInRange(startDay, startDay)) {
             // No need to re-query
@@ -734,11 +753,12 @@ public class AgendaWindowAdapter extends BaseAdapter
             return;
         }
 
+        Log.d(TAG, "refresh:: mCleanQueryInitiated:" + mCleanQueryInitiated + ",searchQuery:" + searchQuery);
         // If AllInOneActivity is sending a second GOTO event(in OnResume), ignore it.
         if (!mCleanQueryInitiated || searchQuery != null) {
             // Query for a total of MIN_QUERY_DURATION days
-            int endDay = startDay + MIN_QUERY_DURATION;
-
+            int endDay = startDay + MIN_QUERY_DURATION;//分页查询7天日程列表
+            Log.d(TAG, "refresh:: query events,startDay:" + startDay + ",endDay:" + endDay);
             mSelectedInstanceId = -1;
             mCleanQueryInitiated = true;
             queueQuery(startDay, endDay, goToTime, searchQuery, QUERY_TYPE_CLEAN, id);
@@ -817,6 +837,7 @@ public class AgendaWindowAdapter extends BaseAdapter
         }
     }
 
+    //构建查询条件
     private Uri buildQueryUri(int start, int end, String searchQuery) {
         Uri rootUri = searchQuery == null ?
                 Instances.CONTENT_BY_DAY_URI :
@@ -854,8 +875,9 @@ public class AgendaWindowAdapter extends BaseAdapter
         return queryDuration;
     }
 
+    //异步查询日程列表
     private boolean queueQuery(int start, int end, Time goToTime,
-            String searchQuery, int queryType, long id) {
+                               String searchQuery, int queryType, long id) {
         QuerySpec queryData = new QuerySpec(queryType);
         queryData.goToTime = new Time(goToTime);    // Creates a new time reference per QuerySpec.
         queryData.start = start;
@@ -865,12 +887,14 @@ public class AgendaWindowAdapter extends BaseAdapter
         return queueQuery(queryData);
     }
 
+    //异步查询日程列表
     private boolean queueQuery(QuerySpec queryData) {
         queryData.searchQuery = mSearchQuery;
         Boolean queuedQuery;
         synchronized (mQueryQueue) {
             queuedQuery = false;
             Boolean doQueryNow = mQueryQueue.isEmpty();
+            Log.w(TAG, "queueQuery:: aysnc query events, doQueryNow:" + doQueryNow);
             mQueryQueue.add(queryData);
             queuedQuery = true;
             if (doQueryNow) {
@@ -881,11 +905,12 @@ public class AgendaWindowAdapter extends BaseAdapter
     }
 
     private void doQuery(QuerySpec queryData) {
+        Log.d(TAG, "doQuery:: mAdapterInfos:" + mAdapterInfos);
         if (!mAdapterInfos.isEmpty()) {
             int start = mAdapterInfos.getFirst().start;
             int end = mAdapterInfos.getLast().end;
             int queryDuration = calculateQueryDuration(start, end);
-            switch(queryData.queryType) {
+            switch (queryData.queryType) {
                 case QUERY_TYPE_OLDER:
                     queryData.end = start - 1;
                     queryData.start = queryData.end - queryDuration;
@@ -932,6 +957,7 @@ public class AgendaWindowAdapter extends BaseAdapter
 
         Uri queryUri = buildQueryUri(
                 queryData.start, queryData.end, queryData.searchQuery);
+        Log.w(TAG, "doQuery:: queryUri:" + queryUri);
         mQueryHandler.startQuery(0, queryData, queryUri,
                 PROJECTION, buildQuerySelection(), null,
                 AGENDA_SORT_ORDER);
@@ -963,15 +989,15 @@ public class AgendaWindowAdapter extends BaseAdapter
         @Override
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
             if (DEBUGLOG) {
-                Log.d(TAG, "(+)onQueryComplete");
+                Log.d(TAG, "(+)onQueryComplete,cursor count:" + cursor.getCount());
             }
-            QuerySpec data = (QuerySpec)cookie;
+            QuerySpec data = (QuerySpec) cookie;
 
             if (cursor == null) {
-              if (mAgendaListView != null && mAgendaListView.getContext() instanceof Activity) {
-                ((Activity) mAgendaListView.getContext()).finish();
-              }
-              return;
+                if (mAgendaListView != null && mAgendaListView.getContext() instanceof Activity) {
+                    ((Activity) mAgendaListView.getContext()).finish();
+                }
+                return;
             }
 
             if (BASICLOG) {
@@ -992,6 +1018,8 @@ public class AgendaWindowAdapter extends BaseAdapter
 
             // Notify Listview of changes and update position
             int cursorSize = cursor.getCount();
+            Log.d(TAG, "onQueryComplete:: cursorSize:" + cursorSize + ",mAdapterInfos size:" + (!mAdapterInfos.isEmpty() ? mAdapterInfos.size() : 0) + ",queryType:" + data.queryType);
+
             if (cursorSize > 0 || mAdapterInfos.isEmpty() || data.queryType == QUERY_TYPE_CLEAN) {
                 final int listPositionOffset = processNewCursor(data, cursor);
                 int newPosition = -1;
@@ -1045,7 +1073,8 @@ public class AgendaWindowAdapter extends BaseAdapter
                             found = true;
                             break;
                         }
-                    };
+                    }
+                    ;
 
                     if (!found) {
                         mSelectedInstanceId = -1;
@@ -1068,12 +1097,12 @@ public class AgendaWindowAdapter extends BaseAdapter
                             // know about the selected view and fill it in.
                             mSelectedVH = new AgendaAdapter.ViewHolder();
                             mSelectedVH.allDay =
-                                cursor.getInt(AgendaWindowAdapter.INDEX_ALL_DAY) != 0;
+                                    cursor.getInt(AgendaWindowAdapter.INDEX_ALL_DAY) != 0;
                             tempCursor = cursor;
                         }
                     } else if (newPosition != -1) {
-                         tempCursor = getCursorByPosition(newPosition);
-                         tempCursorPosition = getCursorPositionByPosition(newPosition);
+                        tempCursor = getCursorByPosition(newPosition);
+                        tempCursorPosition = getCursorPositionByPosition(newPosition);
                     }
                     if (tempCursor != null) {
                         AgendaItem item = buildAgendaItemFromCursor(tempCursor, tempCursorPosition,
@@ -1098,7 +1127,8 @@ public class AgendaWindowAdapter extends BaseAdapter
                         } else {
                             queueQuery(new QuerySpec(QUERY_TYPE_NEWER));
                         }
-                    }};
+                    }
+                };
                 mHeaderView.setOnClickListener(headerFooterOnClickListener);
                 mFooterView.setOnClickListener(headerFooterOnClickListener);
                 mAgendaListView.addFooterView(mFooterView);
@@ -1379,7 +1409,7 @@ public class AgendaWindowAdapter extends BaseAdapter
         DayAdapterInfo info = getAdapterInfoByPosition(position);
         if (info != null) {
             int pos = info.dayAdapter.getHeaderPosition(position - info.offset);
-            return (pos != -1)?(pos + info.offset):-1;
+            return (pos != -1) ? (pos + info.offset) : -1;
         }
         return -1;
     }

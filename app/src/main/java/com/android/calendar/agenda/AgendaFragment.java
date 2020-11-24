@@ -97,15 +97,15 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     @SuppressLint("ValidFragment")
     public AgendaFragment(long timeMillis, boolean usedForSearch) {
         mInitialTimeMillis = timeMillis;
-        mTime = new Time();
-        mLastHandledEventTime = new Time();
+        mTime = new Time();//当前时间日期
+        mLastHandledEventTime = new Time();//上次处理日程事情的时间日期
 
         if (mInitialTimeMillis == 0) {
             mTime.setToNow();
         } else {
             mTime.set(mInitialTimeMillis);
         }
-        mLastHandledEventTime.set(mTime);
+        mLastHandledEventTime.set(mTime);//更新上次处理日程事情的时间日期为现在或者指定时间
         mUsedForSearch = usedForSearch;
     }
 
@@ -162,7 +162,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
 
         View eventView =  v.findViewById(R.id.agenda_event_info);
         if (!mShowEventDetailsWithAgenda) {
-            eventView.setVisibility(View.GONE);
+            eventView.setVisibility(View.GONE);//不显示日程详情
         }
 
         View topListView;
@@ -171,6 +171,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
             (StickyHeaderListView)v.findViewById(R.id.agenda_sticky_header_list);
         if (lv != null) {
             Adapter a = mAgendaListView.getAdapter();
+            Log.d(TAG, "onCreateView:: adapter:" + a);
             lv.setAdapter(a);
             if (a instanceof HeaderViewListAdapter) {
                 mAdapter = (AgendaWindowAdapter) ((HeaderViewListAdapter)a).getWrappedAdapter();
@@ -200,13 +201,13 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
         if (!mShowEventDetailsWithAgenda) {
             ViewGroup.LayoutParams params = topListView.getLayoutParams();
             params.width = screenWidth;
-            topListView.setLayoutParams(params);
+            topListView.setLayoutParams(params);//不显示日程详情,日程列表铺满屏幕
         } else {
             ViewGroup.LayoutParams listParams = topListView.getLayoutParams();
-            listParams.width = screenWidth * 4 / 10;
+            listParams.width = screenWidth * 4 / 10;//显示日程详情,日程列表是屏幕4/10
             topListView.setLayoutParams(listParams);
             ViewGroup.LayoutParams detailsParams = eventView.getLayoutParams();
-            detailsParams.width = screenWidth - listParams.width;
+            detailsParams.width = screenWidth - listParams.width;//显示日程详情,详情是屏幕6/10
             eventView.setLayoutParams(detailsParams);
         }
         return v;
@@ -222,10 +223,13 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
         SharedPreferences prefs = GeneralPreferences.getSharedPreferences(
                 getActivity());
         boolean hideDeclined = prefs.getBoolean(
-                GeneralPreferences.KEY_HIDE_DECLINED, false);
+                GeneralPreferences.KEY_HIDE_DECLINED, false);//是否隐藏不参加的活动
 
         mAgendaListView.setHideDeclinedEvents(hideDeclined);
+
+        Log.d(TAG, "onResume:: mLastHandledEventId:" + mLastHandledEventId + ",mLastHandledEventTime:" + mLastHandledEventTime + ",mQuery:" + mQuery);
         if (mLastHandledEventId != -1) {
+            //查询日程列表
             mAgendaListView.goTo(mLastHandledEventTime, mLastHandledEventId, mQuery, true, false);
             mLastHandledEventTime = null;
             mLastHandledEventId = -1;
