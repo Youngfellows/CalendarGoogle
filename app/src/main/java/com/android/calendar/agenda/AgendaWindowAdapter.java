@@ -165,9 +165,9 @@ public class AgendaWindowAdapter extends BaseAdapter
     private DayAdapterInfo mLastUsedInfo;
 
     private final LinkedList<DayAdapterInfo> mAdapterInfos =
-            new LinkedList<DayAdapterInfo>();
+            new LinkedList<DayAdapterInfo>();//查询结果列表
     private final ConcurrentLinkedQueue<QuerySpec> mQueryQueue =
-            new ConcurrentLinkedQueue<QuerySpec>();
+            new ConcurrentLinkedQueue<QuerySpec>();//查询队列
     private final TextView mHeaderView;
     private final TextView mFooterView;
     private boolean mDoneSettingUpHeaderFooter = false;
@@ -247,14 +247,15 @@ public class AgendaWindowAdapter extends BaseAdapter
     private static final int QUERY_TYPE_NEWER = 1; // Query for newer events
     private static final int QUERY_TYPE_CLEAN = 2; // Delete everything and query around a date
 
+    //查询规范
     private static class QuerySpec {
-        long queryStartMillis;
-        Time goToTime;
-        int start;
-        int end;
-        String searchQuery;
-        int queryType;
-        long id;
+        long queryStartMillis;//开始查询时的纳秒数
+        Time goToTime;//查询的时间日期
+        int start;//查询的起始儒略日数
+        int end;//查询的结束儒略日数
+        String searchQuery;//查询条件
+        int queryType;//查询类型
+        long id;//查询日程ID
 
         public QuerySpec(int queryType) {
             this.queryType = queryType;
@@ -302,6 +303,19 @@ public class AgendaWindowAdapter extends BaseAdapter
                 }
             }
             return true;
+        }
+
+        @Override
+        public String toString() {
+            return "QuerySpec{" +
+                    "queryStartMillis=" + queryStartMillis +
+                    ", goToTime=" + goToTime +
+                    ", start=" + start +
+                    ", end=" + end +
+                    ", searchQuery='" + searchQuery + '\'' +
+                    ", queryType=" + queryType +
+                    ", id=" + id +
+                    '}';
         }
     }
 
@@ -572,6 +586,7 @@ public class AgendaWindowAdapter extends BaseAdapter
         return null;
     }
 
+    //获取当前时间的日程列表
     private DayAdapterInfo getAdapterInfoByTime(Time time) {
         if (DEBUGLOG) Log.e(TAG, "getAdapterInfoByTime " + time.toString());
 
@@ -705,10 +720,10 @@ public class AgendaWindowAdapter extends BaseAdapter
         }
 
         if (DEBUGLOG) {
-            Log.e(TAG, this + ": refresh " + goToTime.toString() + " id " + id
-                    + ((searchQuery != null) ? searchQuery : "")
-                    + (forced ? " forced" : " not forced")
-                    + (refreshEventInfo ? " refresh event info" : ""));
+//            Log.e(TAG, this + ": refresh " + goToTime.toString() + " id " + id
+//                    + ((searchQuery != null) ? searchQuery : "")
+//                    + (forced ? " forced" : " not forced")
+//                    + (refreshEventInfo ? " refresh event info" : ""));
         }
 
         //查询日程的儒略历日开始时间
@@ -761,15 +776,15 @@ public class AgendaWindowAdapter extends BaseAdapter
             Log.d(TAG, "refresh:: query events,startDay:" + startDay + ",endDay:" + endDay);
             mSelectedInstanceId = -1;
             mCleanQueryInitiated = true;
-            queueQuery(startDay, endDay, goToTime, searchQuery, QUERY_TYPE_CLEAN, id);
+            queueQuery(startDay, endDay, goToTime, searchQuery, QUERY_TYPE_CLEAN, id);//查询今天开始的全部7天日程日程列表
 
             // Pre-fetch more data to overcome a race condition in AgendaListView.shiftSelection
             // Queuing more data with the goToTime set to the selected time skips the call to
             // shiftSelection on refresh.
             mOlderRequests++;
-            queueQuery(0, 0, goToTime, searchQuery, QUERY_TYPE_OLDER, id);
+            queueQuery(0, 0, goToTime, searchQuery, QUERY_TYPE_OLDER, id);//查询今天之前的日程
             mNewerRequests++;
-            queueQuery(0, 0, goToTime, searchQuery, QUERY_TYPE_NEWER, id);
+            queueQuery(0, 0, goToTime, searchQuery, QUERY_TYPE_NEWER, id);//查询7天后的日程
         }
     }
 
@@ -784,6 +799,7 @@ public class AgendaWindowAdapter extends BaseAdapter
     private DayAdapterInfo pruneAdapterInfo(int queryType) {
         synchronized (mAdapterInfos) {
             DayAdapterInfo recycleMe = null;
+            Log.d(TAG, "pruneAdapterInfo:: mAdapterInfos size:" + mAdapterInfos.size());
             if (!mAdapterInfos.isEmpty()) {
                 if (mAdapterInfos.size() >= MAX_NUM_OF_ADAPTERS) {
                     if (queryType == QUERY_TYPE_NEWER) {
@@ -821,6 +837,7 @@ public class AgendaWindowAdapter extends BaseAdapter
                     }
                 }
             }
+            Log.d(TAG, "pruneAdapterInfo:: recycleMe:" + recycleMe);
             return recycleMe;
         }
     }
@@ -893,19 +910,21 @@ public class AgendaWindowAdapter extends BaseAdapter
         Boolean queuedQuery;
         synchronized (mQueryQueue) {
             queuedQuery = false;
-            Boolean doQueryNow = mQueryQueue.isEmpty();
+            Boolean doQueryNow = mQueryQueue.isEmpty();//队列为空
             Log.w(TAG, "queueQuery:: aysnc query events, doQueryNow:" + doQueryNow);
-            mQueryQueue.add(queryData);
+            mQueryQueue.add(queryData);//添加查询到查询队列
             queuedQuery = true;
-            if (doQueryNow) {
+            if (doQueryNow) {//立即查询
                 doQuery(queryData);
             }
         }
         return queuedQuery;
     }
 
+    //执行查询
     private void doQuery(QuerySpec queryData) {
-        Log.d(TAG, "doQuery:: mAdapterInfos:" + mAdapterInfos);
+        Log.i(TAG, "doQuery:: mAdapterInfos:" + mAdapterInfos);
+        Log.i(TAG, "doQuery:: 执行查询日程: " + queryData.toString());
         if (!mAdapterInfos.isEmpty()) {
             int start = mAdapterInfos.getFirst().start;
             int end = mAdapterInfos.getLast().end;
@@ -925,7 +944,7 @@ public class AgendaWindowAdapter extends BaseAdapter
             // b/5311977
             if (mRowCount < 20 && queryData.queryType != QUERY_TYPE_CLEAN) {
                 if (DEBUGLOG) {
-                    Log.e(TAG, "Compacting cursor: mRowCount=" + mRowCount
+                    Log.i(TAG, "doQuery:: Compacting cursor: mRowCount=" + mRowCount
                             + " totalStart:" + start
                             + " totalEnd:" + end
                             + " query.start:" + queryData.start
@@ -948,16 +967,16 @@ public class AgendaWindowAdapter extends BaseAdapter
             time.setJulianDay(queryData.start);
             Time time2 = new Time(mTimeZone);
             time2.setJulianDay(queryData.end);
-            Log.v(TAG, "startQuery: " + time.toString() + " to "
+            Log.i(TAG, "doQuery:: startQuery: " + time.toString() + " to "
                     + time2.toString() + " then go to " + queryData.goToTime);
         }
 
         mQueryHandler.cancelOperation(0);
-        if (BASICLOG) queryData.queryStartMillis = System.nanoTime();
+        if (BASICLOG) queryData.queryStartMillis = System.nanoTime();//开始查询时间戳,
 
         Uri queryUri = buildQueryUri(
                 queryData.start, queryData.end, queryData.searchQuery);
-        Log.w(TAG, "doQuery:: queryUri:" + queryUri);
+        Log.i(TAG, "doQuery:: queryUri:" + queryUri);
         mQueryHandler.startQuery(0, queryData, queryUri,
                 PROJECTION, buildQuerySelection(), null,
                 AGENDA_SORT_ORDER);
@@ -989,9 +1008,9 @@ public class AgendaWindowAdapter extends BaseAdapter
         @Override
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
             if (DEBUGLOG) {
-                Log.d(TAG, "(+)onQueryComplete,cursor count:" + cursor.getCount());
+                Log.i(TAG, "(+)onQueryComplete,cursor count:" + cursor.getCount()+",查询日程成功...");
             }
-            QuerySpec data = (QuerySpec) cookie;
+            QuerySpec data = (QuerySpec) cookie;//查询条件
 
             if (cursor == null) {
                 if (mAgendaListView != null && mAgendaListView.getContext() instanceof Activity) {
@@ -1001,8 +1020,8 @@ public class AgendaWindowAdapter extends BaseAdapter
             }
 
             if (BASICLOG) {
-                long queryEndMillis = System.nanoTime();
-                Log.e(TAG, "Query time(ms): "
+                long queryEndMillis = System.nanoTime();//高分辨率时间源，以纳秒为单位
+                Log.d(TAG, "Query time(ms): "
                         + (queryEndMillis - data.queryStartMillis) / 1000000
                         + " Count: " + cursor.getCount());
             }
@@ -1018,7 +1037,7 @@ public class AgendaWindowAdapter extends BaseAdapter
 
             // Notify Listview of changes and update position
             int cursorSize = cursor.getCount();
-            Log.d(TAG, "onQueryComplete:: cursorSize:" + cursorSize + ",mAdapterInfos size:" + (!mAdapterInfos.isEmpty() ? mAdapterInfos.size() : 0) + ",queryType:" + data.queryType);
+            Log.w(TAG, "onQueryComplete:: cursorSize:" + cursorSize + ",mAdapterInfos size:" + (!mAdapterInfos.isEmpty() ? mAdapterInfos.size() : 0) + ",queryType:" + data.queryType);
 
             if (cursorSize > 0 || mAdapterInfos.isEmpty() || data.queryType == QUERY_TYPE_CLEAN) {
                 final int listPositionOffset = processNewCursor(data, cursor);
@@ -1048,7 +1067,7 @@ public class AgendaWindowAdapter extends BaseAdapter
                                 ViewType.CURRENT);
                     }
                     if (DEBUGLOG) {
-                        Log.e(TAG, "Setting listview to " +
+                        Log.d(TAG, "Setting listview to " +
                                 "findEventPositionNearestTime: " + (newPosition + OFF_BY_ONE_BUG));
                     }
                 }
@@ -1140,9 +1159,10 @@ public class AgendaWindowAdapter extends BaseAdapter
 
                 if (cursorSize != 0) {
                     // Remove the query that just completed
-                    QuerySpec x = mQueryQueue.poll();
+                    QuerySpec x = mQueryQueue.poll();//移除队列请求
+                    Log.d(TAG, "onQueryComplete:: 移除已经完成队列请求元素,剩余请求size:" + mQueryQueue.size());
                     if (BASICLOG && !x.equals(data)) {
-                        Log.e(TAG, "onQueryComplete - cookie != head of queue");
+                        Log.e(TAG, "onQueryComplete:: onQueryComplete - cookie != head of queue");
                     }
                     mEmptyCursorCount = 0;
                     if (data.queryType == QUERY_TYPE_NEWER) {
@@ -1155,7 +1175,7 @@ public class AgendaWindowAdapter extends BaseAdapter
                     totalAgendaRangeEnd = mAdapterInfos.getLast().end;
                 } else { // CursorSize == 0
                     QuerySpec querySpec = mQueryQueue.peek();
-
+                    Log.d(TAG, "onQueryComplete:: peek,querySpec: " + querySpec);
                     // Update Adapter Info with new start and end date range
                     if (!mAdapterInfos.isEmpty()) {
                         DayAdapterInfo first = mAdapterInfos.getFirst();
@@ -1197,6 +1217,7 @@ public class AgendaWindowAdapter extends BaseAdapter
 
                     if (++mEmptyCursorCount > RETRIES_ON_NO_DATA) {
                         // Nothing in the cursor again. Dropping query
+                        Log.d(TAG, "onQueryComplete:: plll");
                         mQueryQueue.poll();
                     }
                 }
@@ -1230,6 +1251,7 @@ public class AgendaWindowAdapter extends BaseAdapter
                     }
                 }
 
+                //取出队列未查询任务
                 // Fire off the next query if any
                 Iterator<QuerySpec> it = mQueryQueue.iterator();
                 while (it.hasNext()) {
@@ -1237,13 +1259,17 @@ public class AgendaWindowAdapter extends BaseAdapter
                     if (queryData.queryType == QUERY_TYPE_CLEAN
                             || !isInRange(queryData.start, queryData.end)) {
                         // Query accepted
-                        if (DEBUGLOG) Log.e(TAG, "Query accepted. QueueSize:" + mQueryQueue.size());
+                        if (DEBUGLOG){
+                            Log.w(TAG, "onQueryComplete:: Query accepted. QueueSize:" + mQueryQueue.size());
+                            Log.w(TAG, "onQueryComplete:: onQueryComplete: 继续取出队列元素查询:" + queryData.toString());
+                        }
                         doQuery(queryData);
                         break;
                     } else {
                         // Query rejected
-                        it.remove();
-                        if (DEBUGLOG) Log.e(TAG, "Query rejected. QueueSize:" + mQueryQueue.size());
+                        it.remove();//清除队列
+                        if (DEBUGLOG)
+                            Log.w(TAG, "onQueryComplete:: Query rejected. QueueSize:" + mQueryQueue.size() + ",清除队列");
                     }
                 }
             }
@@ -1257,7 +1283,8 @@ public class AgendaWindowAdapter extends BaseAdapter
         /*
          * Update the adapter info array with a the new cursor. Close out old
          * cursors as needed.
-         *
+         * @param data 查询条件
+         * @param cursor 返回结果列表
          * @return number of rows removed from the beginning
          */
         private int processNewCursor(QuerySpec data, Cursor cursor) {
@@ -1274,6 +1301,7 @@ public class AgendaWindowAdapter extends BaseAdapter
                     listPositionOffset = -info.size;
                 }
 
+                //设置查询日程数据集
                 // Setup adapter info
                 info.start = data.start;
                 info.end = data.end;

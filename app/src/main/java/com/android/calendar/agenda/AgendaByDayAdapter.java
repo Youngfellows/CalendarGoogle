@@ -22,6 +22,7 @@ import android.graphics.Typeface;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +40,7 @@ import java.util.LinkedList;
 import java.util.Locale;
 
 public class AgendaByDayAdapter extends BaseAdapter {
+    private String TAG = this.getClass().getSimpleName();
     private static final int TYPE_DAY = 0;
     private static final int TYPE_MEETING = 1;
     static final int TYPE_LAST = 2;
@@ -295,34 +297,38 @@ public class AgendaByDayAdapter extends BaseAdapter {
         mAgendaAdapter.changeCursor(info.cursor);
     }
 
+    //计算天数日程
     public void calculateDays(DayAdapterInfo dayAdapterInfo) {
+        Log.d(TAG, "calculateDays:: ... ");
         Cursor cursor = dayAdapterInfo.cursor;
-        ArrayList<RowInfo> rowInfo = new ArrayList<RowInfo>();
+        ArrayList<RowInfo> rowInfo = new ArrayList<RowInfo>();//行信息
         int prevStartDay = -1;
 
         Time tempTime = new Time(mTimeZone);
         long now = System.currentTimeMillis();
         tempTime.set(now);
-        mTodayJulianDay = Time.getJulianDay(now, tempTime.gmtoff);
+        mTodayJulianDay = Time.getJulianDay(now, tempTime.gmtoff);//当前时间的儒略日数
 
-        LinkedList<MultipleDayInfo> multipleDayList = new LinkedList<MultipleDayInfo>();
+        LinkedList<MultipleDayInfo> multipleDayList = new LinkedList<MultipleDayInfo>();//多天列表
         for (int position = 0; cursor.moveToNext(); position++) {
-            int startDay = cursor.getInt(AgendaWindowAdapter.INDEX_START_DAY);
+            int startDay = cursor.getInt(AgendaWindowAdapter.INDEX_START_DAY);//日程开始的儒略日数
             long id = cursor.getLong(AgendaWindowAdapter.INDEX_EVENT_ID);
-            long startTime =  cursor.getLong(AgendaWindowAdapter.INDEX_BEGIN);
-            long endTime =  cursor.getLong(AgendaWindowAdapter.INDEX_END);
+            long startTime =  cursor.getLong(AgendaWindowAdapter.INDEX_BEGIN);//日程开始的时间戳
+            long endTime =  cursor.getLong(AgendaWindowAdapter.INDEX_END);//日程结束的时间戳
             long instanceId = cursor.getLong(AgendaWindowAdapter.INDEX_INSTANCE_ID);
             boolean allDay = cursor.getInt(AgendaWindowAdapter.INDEX_ALL_DAY) != 0;
             if (allDay) {
-                startTime = Utils.convertAlldayUtcToLocal(tempTime, startTime, mTimeZone);
+                startTime = Utils.convertAlldayUtcToLocal(tempTime, startTime, mTimeZone);//将给定的UTC时间转换为当前本地时间
                 endTime = Utils.convertAlldayUtcToLocal(tempTime, endTime, mTimeZone);
+                Log.d(TAG, "calculateDays:: allDay,startTime:" + startTime + ",endTime:" + endTime);
             }
             // Skip over the days outside of the adapter's range
-            startDay = Math.max(startDay, dayAdapterInfo.start);
+            startDay = Math.max(startDay, dayAdapterInfo.start);//跳过适配器范围之外的天数
             // Make sure event's start time is not before the start of the day
             // (setJulianDay sets the time to 12:00am)
-            long adapterStartTime = tempTime.setJulianDay(startDay);
+            long adapterStartTime = tempTime.setJulianDay(startDay);//时间设置为日程开始的儒略日数
             startTime = Math.max(startTime, adapterStartTime);
+            Log.d(TAG, "calculateDays:: " + position + ",startDay:" + startDay + ",prevStartDay:" + prevStartDay + ",adapterStartTime:" + adapterStartTime + ",startTime:" + startTime + ",endTime:" + endTime);
 
             if (startDay != prevStartDay) {
                 // Check if we skipped over any empty days
@@ -332,6 +338,7 @@ public class AgendaByDayAdapter extends BaseAdapter {
                     // If there are any multiple-day events that span the empty
                     // range of days, then create day headers and events for
                     // those multiple-day events.
+                    Log.d(TAG, "calculateDays:: prevStartDay:" + prevStartDay + ",startDay:" + startDay);
                     boolean dayHeaderAdded = false;
                     for (int currentDay = prevStartDay + 1; currentDay <= startDay; currentDay++) {
                         dayHeaderAdded = false;
@@ -340,8 +347,9 @@ public class AgendaByDayAdapter extends BaseAdapter {
                             MultipleDayInfo info = iter.next();
                             // If this event has ended then remove it from the
                             // list.
+                            Log.d(TAG, "calculateDays:: currentDay:" + currentDay + ",info.mEndDay:" + info.mEndDay);
                             if (info.mEndDay < currentDay) {
-                                iter.remove();
+                                iter.remove();//如果此事件已结束，则将其从列表中删除。
                                 continue;
                             }
 
@@ -375,12 +383,12 @@ public class AgendaByDayAdapter extends BaseAdapter {
 
             // If this event spans multiple days, then add it to the multipleDay
             // list.
-            int endDay = cursor.getInt(AgendaWindowAdapter.INDEX_END_DAY);
-
+            int endDay = cursor.getInt(AgendaWindowAdapter.INDEX_END_DAY);//日程结束的儒略日数
+            Log.d(TAG, "calculateDays:: endDay:" + endDay + ",startDay:" + startDay + ",dayAdapterInfo.end:" + dayAdapterInfo.end);
             // Skip over the days outside of the adapter's range
             endDay = Math.min(endDay, dayAdapterInfo.end);
-            if (endDay > startDay) {
-                long nextMidnight = Utils.getNextMidnight(tempTime, startTime, mTimeZone);
+            if (endDay > startDay) {//日程结束时间>日程开始时间,即是多天的日程,跨天日程
+                long nextMidnight = Utils.getNextMidnight(tempTime, startTime, mTimeZone);//日程开始时间下一个午夜（以毫秒为单位）,即超过一天的
                 multipleDayList.add(new MultipleDayInfo(position, endDay, id, nextMidnight,
                         endTime, instanceId, allDay));
                 // Add in the event for this cursor position - since it is the start of a multi-day
@@ -390,7 +398,7 @@ public class AgendaByDayAdapter extends BaseAdapter {
             } else {
                 // Add in the event for this cursor position
                 rowInfo.add(new RowInfo(TYPE_MEETING, startDay, position, id, startTime, endTime,
-                        instanceId, allDay));
+                        instanceId, allDay));//日程不跨天
             }
         }
 
