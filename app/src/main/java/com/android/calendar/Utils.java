@@ -483,6 +483,7 @@ public class Utils {
             }
             newCursor.addRow(data);
         }
+        Log.d(TAG, "matrixCursorFromCursor:: " + Arrays.asList(data));
         return newCursor;
     }
 

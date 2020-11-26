@@ -754,8 +754,10 @@ public class CalendarController {
         mContext.startActivity(intent);
     }
 
+    //新建活动日程
     private void launchCreateEvent(long startMillis, long endMillis, boolean allDayEvent,
             String title, long calendarId) {
+        Log.d(TAG, "launchCreateEvent:: 新建活动日程 ...");
         Intent intent = generateCreateEventIntent(startMillis, endMillis, allDayEvent, title,
             calendarId);
         mEventId = -1;
@@ -764,6 +766,7 @@ public class CalendarController {
 
     public Intent generateCreateEventIntent(long startMillis, long endMillis,
         boolean allDayEvent, String title, long calendarId) {
+        Log.d(TAG, "generateCreateEventIntent:: startMillis:" + startMillis + ",endMillis:" + endMillis + ",allDayEvent:" + allDayEvent + ",title:" + title + ",calendarId:" + calendarId);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setClass(mContext, EditEventActivity.class);
         intent.putExtra(EXTRA_EVENT_BEGIN_TIME, startMillis);

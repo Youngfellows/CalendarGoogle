@@ -42,7 +42,7 @@ import java.util.ArrayList;
 public class EditEventActivity extends AbstractCalendarActivity {
     private static final String TAG = "EditEventActivity";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final String BUNDLE_KEY_EVENT_ID = "key_event_id";
 
@@ -67,15 +67,15 @@ public class EditEventActivity extends AbstractCalendarActivity {
         super.onCreate(icicle);
         setContentView(R.layout.simple_frame_layout);
 
-        mEventInfo = getEventInfoFromIntent(icicle);
-        mReminders = getReminderEntriesFromIntent();
-        mEventColorInitialized = getIntent().hasExtra(EXTRA_EVENT_COLOR);
-        mEventColor = getIntent().getIntExtra(EXTRA_EVENT_COLOR, -1);
+        mEventInfo = getEventInfoFromIntent(icicle);//获取日程信息
+        mReminders = getReminderEntriesFromIntent();//获取提醒列表
+        mEventColorInitialized = getIntent().hasExtra(EXTRA_EVENT_COLOR);//是否有日程颜色
+        mEventColor = getIntent().getIntExtra(EXTRA_EVENT_COLOR, -1);//获取日程颜色
 
 
         mEditFragment = (EditEventFragment) getFragmentManager().findFragmentById(R.id.main_frame);
 
-        mIsMultipane = Utils.getConfigBool(this, R.bool.multiple_pane_config);
+        mIsMultipane = Utils.getConfigBool(this, R.bool.multiple_pane_config);//是否平板
 
         if (mIsMultipane) {
             getActionBar().setDisplayOptions(
@@ -91,6 +91,7 @@ public class EditEventActivity extends AbstractCalendarActivity {
                     ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
         }
 
+        Log.d(TAG, "onCreate:: mEditFragment:" + mEditFragment);
         if (mEditFragment == null) {
             Intent intent = null;
             if (mEventInfo.id == -1) {
@@ -160,6 +161,7 @@ public class EditEventActivity extends AbstractCalendarActivity {
         } else {
             info.extraLong = 0;
         }
+        Log.d(TAG, "getEventInfoFromIntent:: " + info.toString());
         return info;
     }
 

@@ -16,6 +16,7 @@
 
 package com.android.calendar.event;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -71,7 +72,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class EditEventFragment extends Fragment implements EventHandler, OnColorSelectedListener {
-    private static final String TAG = "EditEventActivity";
+    private static final String TAG = "EditEventFragment";
     private static final String COLOR_PICKER_DIALOG_TAG = "ColorPickerDialog";
 
     private static final int REQUEST_CODE_COLOR_PICKER = 0;
@@ -85,7 +86,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
     private static final String BUNDLE_KEY_DATE_BUTTON_CLICKED = "date_button_clicked";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final int TOKEN_EVENT = 1;
     private static final int TOKEN_ATTENDEES = 1 << 1;
@@ -160,6 +161,8 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         @Override
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
             // If the query didn't return a cursor for some reason return
+            Log.w(TAG, "onQueryComplete:: cookie:" + cookie);
+            Log.w(TAG, "onQueryComplete:: cursor count:" + cursor.getCount());
             if (cursor == null) {
                 return;
             }
@@ -434,8 +437,9 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         this(null, null, false, -1, false, null);
     }
 
+    @SuppressLint("ValidFragment")
     public EditEventFragment(EventInfo event, ArrayList<ReminderEntry> reminders,
-            boolean eventColorInitialized, int eventColor, boolean readOnly, Intent intent) {
+                             boolean eventColorInitialized, int eventColor, boolean readOnly, Intent intent) {
         mEvent = event;
         mIsReadOnly = readOnly;
         mIntent = intent;
@@ -545,6 +549,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        Log.w(TAG, "onAttach:: ^^_^^ ... ");
         mActivity = activity;
 
         mHelper = new EditEventHelper(activity, null);
@@ -560,6 +565,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
 //        mContext.requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        Log.w(TAG, "onCreateView:: ^^_^^ ... ");
         View view;
         if (mIsReadOnly) {
             view = inflater.inflate(R.layout.edit_event_single_column, null);
@@ -587,6 +593,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        Log.w(TAG, "onDestroyView:: ^^_^^ ... ");
 
         if (mUseCustomActionBar) {
             mActivity.getActionBar().setCustomView(null);
@@ -596,6 +603,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.w(TAG, "onCreate:: ^^_^^ ... ,savedInstanceState=" + savedInstanceState);
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(BUNDLE_KEY_MODEL)) {
                 mRestoreModel = (CalendarEventModel) savedInstanceState.getSerializable(
@@ -633,7 +641,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-
+        Log.w(TAG, "onCreateOptionsMenu:: ^^_^^ ... ");
         if (!mUseCustomActionBar) {
             inflater.inflate(R.menu.edit_event_title_bar, menu);
         }
@@ -641,6 +649,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.w(TAG, "onOptionsItemSelected:: ^^_^^ ... ");
         return onActionBarItemSelected(item.getItemId());
     }
 
@@ -904,6 +913,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
     @Override
     public void onPause() {
+        Log.w(TAG, "onPause:: ^^_^^ ... ");
         Activity act = getActivity();
         if (mSaveOnDetach && act != null && !mIsReadOnly && !act.isChangingConfigurations()
                 && mView.prepareForSave()) {
@@ -915,6 +925,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
     @Override
     public void onDestroy() {
+        Log.w(TAG, "onDestroy:: ^^_^^ ... ");
         if (mView != null) {
             mView.setModel(null);
         }
@@ -930,8 +941,10 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         // TODO Requery to see if event has changed
     }
 
+    //保存数据
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        Log.w(TAG, "onSaveInstanceState:: ^^_^^ ...,outState:" + outState);
         mView.prepareForSave();
         outState.putSerializable(BUNDLE_KEY_MODEL, mModel);
         outState.putInt(BUNDLE_KEY_EDIT_STATE, mModification);
@@ -956,11 +969,13 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
     @Override
     public long getSupportedEventTypes() {
+        Log.w(TAG, "getSupportedEventTypes:: ^^_^^ ... ");
         return EventType.USER_HOME;
     }
 
     @Override
     public void handleEvent(EventInfo event) {
+        Log.w(TAG, "handleEvent:: ^^_^^ ... ");
         // It's currently unclear if we want to save the event or not when home
         // is pressed. When creating a new event we shouldn't save since we
         // can't get the id of the new event easily.
@@ -982,6 +997,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
     @Override
     public void onColorSelected(int color) {
+        Log.w(TAG, "onColorSelected:: ^^_^^ ... ");
         if (!mModel.isEventColorInitialized() || mModel.getEventColor() != color) {
             mModel.setEventColor(color);
             mView.updateHeadlineColor(mModel, color);
