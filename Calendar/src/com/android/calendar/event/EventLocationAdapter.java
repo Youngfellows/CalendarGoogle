@@ -270,6 +270,7 @@ public class EventLocationAdapter extends ArrayAdapter<EventLocationAdapter.Resu
         protected FilterResults performFiltering(CharSequence constraint) {
             long startTime = System.currentTimeMillis();
             final String filter = constraint == null ? "" : constraint.toString();
+            Log.d(TAG, "performFiltering:: filter:" + filter);
             if (filter.isEmpty()) {
                 return null;
             }
@@ -422,6 +423,7 @@ public class EventLocationAdapter extends ArrayAdapter<EventLocationAdapter.Resu
     private static List<Result> queryRecentLocations(ContentResolver resolver, String input) {
         // TODO: also match each word in the address?
         String filter = input == null ? "" : input + "%";
+        Log.d(TAG, "queryRecentLocations:: filter:" + filter);
         if (filter.isEmpty()) {
             return null;
         }

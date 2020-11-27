@@ -6,7 +6,13 @@ apply plugin: 'com.android.library'
 android {
 	compileSdkVersion 30
     buildToolsVersion "30.0.2"
-	
+
+    defaultConfig {
+        //minSdkVersion 11
+        minSdkVersion 16
+        targetSdkVersion 30
+    }
+
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'

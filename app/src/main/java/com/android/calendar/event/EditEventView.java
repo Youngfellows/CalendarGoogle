@@ -102,12 +102,15 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.TimeZone;
 
+/**
+ * 日程事件编辑的视图
+ */
 public class EditEventView implements OnClickListener, DialogInterface.OnCancelListener,
         DialogInterface.OnClickListener, OnItemSelectedListener,
         RecurrencePickerDialog.OnRecurrenceSetListener,
         TimeZonePickerDialog.OnTimeZoneSetListener {
 
-    private static final String TAG = "EditEvent";
+    private String TAG = this.getClass().getSimpleName();
     private static final String GOOGLE_SECONDARY_CALENDAR = "calendar.google.com";
     private static final String PERIOD_SPACE = ". ";
 
@@ -524,12 +527,14 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
         }
     }
 
+    //日历账户列表
     public static class CalendarsAdapter extends ResourceCursorAdapter {
         public CalendarsAdapter(Context context, int resourceId, Cursor c) {
             super(context, resourceId, c);
             setDropDownViewResource(R.layout.calendars_dropdown_item);
         }
 
+        //绑定日历账户列表
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
             View colorBar = view.findViewById(R.id.color);
@@ -819,8 +824,8 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
         mColorPickerNewEvent = view.findViewById(R.id.change_color_new_event);
         mColorPickerExistingEvent = view.findViewById(R.id.change_color_existing_event);
 
-        mTitleTextView.setTag(mTitleTextView.getBackground());
-        mLocationTextView.setTag(mLocationTextView.getBackground());
+        mTitleTextView.setTag(mTitleTextView.getBackground());//活动名称
+        mLocationTextView.setTag(mLocationTextView.getBackground());//地点
         mLocationAdapter = new EventLocationAdapter(activity);
         mLocationTextView.setAdapter(mLocationAdapter);
         mLocationTextView.setOnEditorActionListener(new OnEditorActionListener() {
@@ -838,6 +843,7 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
         mAvailabilityExplicitlySet = false;
         mAllDayChangingAvailability = false;
         mAvailabilityCurrentlySelected = -1;
+        //将我的状态显示为xxx
         mAvailabilitySpinner.setOnItemSelectedListener(
                 new OnItemSelectedListener() {
             @Override
@@ -892,12 +898,12 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
         mResponseRadioGroup = (RadioGroup) view.findViewById(R.id.response_value);
         mRemindersContainer = (LinearLayout) view.findViewById(R.id.reminder_items_container);
 
-        mTimezone = Utils.getTimeZone(activity, null);
-        mIsMultipane = activity.getResources().getBoolean(R.bool.tablet_config);
+        mTimezone = Utils.getTimeZone(activity, null);//获取时区
+        mIsMultipane = activity.getResources().getBoolean(R.bool.tablet_config);//是否平板
         mStartTime = new Time(mTimezone);
         mEndTime = new Time(mTimezone);
-        mEmailValidator = new Rfc822Validator(null);
-        initMultiAutoCompleteTextView((RecipientEditTextView) mAttendeesList);
+        mEmailValidator = new Rfc822Validator(null);//邮箱正则
+        initMultiAutoCompleteTextView((RecipientEditTextView) mAttendeesList);//初始化邀请对象
 
         // Display loading screen
         setModel(null);
@@ -913,6 +919,7 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
         if (tzpd != null) {
             tzpd.setOnTimeZoneSetListener(this);
         }
+        //时间选择
         TimePickerDialog tpd = (TimePickerDialog) fm.findFragmentByTag(FRAG_TAG_TIME_PICKER);
         if (tpd != null) {
             View v;
@@ -924,6 +931,7 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
             }
             tpd.setOnTimeSetListener(new TimeListener(v));
         }
+        //日期选择
         mDatePickerDialog = (DatePickerDialog) fm.findFragmentByTag(FRAG_TAG_DATE_PICKER);
         if (mDatePickerDialog != null) {
             View v;
@@ -1052,6 +1060,7 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
      * @param model The event model to pull the data from
      */
     public void setModel(CalendarEventModel model) {
+        Log.d(TAG, "setModel:: model:" + model);
         mModel = model;
 
         // Need to close the autocomplete adapter to prevent leaking cursors.
@@ -1326,6 +1335,9 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
      * We tuck a reference to a Cursor with calendar database data into the spinner, so that
      * we can easily extract calendar-specific values when the value changes (the spinner's
      * onItemSelected callback is configured).
+     * @param cursor 日历账户列表
+     * @param userVisible Fragment是否可见
+     * @param selectedCalendarId
      */
     public void setCalendarsCursor(Cursor cursor, boolean userVisible, long selectedCalendarId) {
         // If there are no syncable calendars, then we cannot allow
@@ -1339,6 +1351,7 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
             if (!userVisible) {
                 return;
             }
+            //显示添加日历账户的对话框
             // Create an error message for the user that, when clicked,
             // will exit this activity without saving the event.
             AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
@@ -1352,14 +1365,14 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
 
         int selection;
         if (selectedCalendarId != -1) {
-            selection = findSelectedCalendarPosition(cursor, selectedCalendarId);
+            selection = findSelectedCalendarPosition(cursor, selectedCalendarId);//查找指定日历id的日历账户的日历位置
         } else {
-            selection = findDefaultCalendarPosition(cursor);
+            selection = findDefaultCalendarPosition(cursor);//默认日历账户日历位置
         }
 
         // populate the calendars spinner
         CalendarsAdapter adapter = new CalendarsAdapter(mActivity,
-            R.layout.calendars_spinner_item, cursor);
+            R.layout.calendars_spinner_item, cursor);//日历账户列表
         mCalendarsSpinner.setAdapter(adapter);
         mCalendarsSpinner.setOnItemSelectedListener(this);
         mCalendarsSpinner.setSelection(selection);
@@ -1465,6 +1478,7 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
         updateHomeTime();
     }
 
+    //查找指定日历id的日历账户的日历位置
     private int findSelectedCalendarPosition(Cursor calendarsCursor, long calendarId) {
         if (calendarsCursor.getCount() <= 0) {
             return -1;
@@ -1481,19 +1495,20 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
         return 0;
     }
 
+    //查找默认日历账户的日历位置
     // Find the calendar position in the cursor that matches calendar in
     // preference
     private int findDefaultCalendarPosition(Cursor calendarsCursor) {
         if (calendarsCursor.getCount() <= 0) {
             return -1;
         }
-
+        //获取保存的默认日历账户
         String defaultCalendar = Utils.getSharedPreference(
                 mActivity, GeneralPreferences.KEY_DEFAULT_CALENDAR, (String) null);
-
-        int calendarsOwnerIndex = calendarsCursor.getColumnIndexOrThrow(Calendars.OWNER_ACCOUNT);
-        int accountNameIndex = calendarsCursor.getColumnIndexOrThrow(Calendars.ACCOUNT_NAME);
-        int accountTypeIndex = calendarsCursor.getColumnIndexOrThrow(Calendars.ACCOUNT_TYPE);
+        Log.d(TAG, "findDefaultCalendarPosition:: defaultCalendar:" + defaultCalendar);
+        int calendarsOwnerIndex = calendarsCursor.getColumnIndexOrThrow(Calendars.OWNER_ACCOUNT);//日历账户所有者
+        int accountNameIndex = calendarsCursor.getColumnIndexOrThrow(Calendars.ACCOUNT_NAME);//日历账户名称
+        int accountTypeIndex = calendarsCursor.getColumnIndexOrThrow(Calendars.ACCOUNT_TYPE);//日历账户类型
         int position = 0;
         calendarsCursor.moveToPosition(-1);
         while (calendarsCursor.moveToNext()) {
@@ -1505,11 +1520,12 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
                         calendarOwner.equals(calendarsCursor.getString(accountNameIndex)) &&
                         !CalendarContract.ACCOUNT_TYPE_LOCAL.equals(
                                 calendarsCursor.getString(accountTypeIndex))) {
-                    return position;
+                    return position;//不是本地日历账户
                 }
             } else if (defaultCalendar.equals(calendarOwner)) {
                 // Found the default calendar.
-                return position;
+                Log.d(TAG, "findDefaultCalendarPosition:: Found the default calendar,position:" + position);
+                return position;//默认日历账户
             }
             position++;
         }
@@ -1566,7 +1582,7 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
     // From com.google.android.gm.ComposeActivity
     private MultiAutoCompleteTextView initMultiAutoCompleteTextView(RecipientEditTextView list) {
         if (ChipsUtil.supportsChipsUi()) {
-            mAddressAdapter = new RecipientAdapter(mActivity);
+            mAddressAdapter = new RecipientAdapter(mActivity);//邀请对象
             list.setAdapter((BaseRecipientAdapter) mAddressAdapter);
             list.setOnFocusListShrinkRecipients(false);
         } else {
@@ -1718,6 +1734,7 @@ public class EditEventView implements OnClickListener, DialogInterface.OnCancelL
                 mColorPickerExistingEvent.getVisibility() == View.VISIBLE;
     }
 
+    //更新选择日历账户
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         // This is only used for the Calendar spinner in new events, and only fires when the

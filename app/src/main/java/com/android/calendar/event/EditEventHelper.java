@@ -1384,6 +1384,7 @@ public class EditEventHelper {
         return null;
     }
 
+    //编辑完成的Task
     public interface EditDoneRunnable extends Runnable {
         public void setDoneCode(int code);
     }

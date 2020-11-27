@@ -257,6 +257,7 @@ public class EventLocationAdapter extends ArrayAdapter<EventLocationAdapter.Resu
      */
     @Override
     public Filter getFilter() {
+        Log.d(TAG, "getFilter:: ");
         return new LocationFilter();
     }
 
@@ -268,6 +269,7 @@ public class EventLocationAdapter extends ArrayAdapter<EventLocationAdapter.Resu
 
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
+            Log.d(TAG, "performFiltering:: constraint:" + constraint);
             long startTime = System.currentTimeMillis();
             final String filter = constraint == null ? "" : constraint.toString();
             if (filter.isEmpty()) {
@@ -330,6 +332,7 @@ public class EventLocationAdapter extends ArrayAdapter<EventLocationAdapter.Resu
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
+            Log.d(TAG, "publishResults:: results size:" + (results != null ? ((ArrayList<Result>) results.values).size() : results));
             mResultList.clear();
             if (results != null && results.count > 0) {
                 mResultList.addAll((ArrayList<Result>) results.values);

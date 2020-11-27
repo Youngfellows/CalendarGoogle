@@ -800,8 +800,8 @@ public class Utils {
     /**
      * Null-safe object comparison
      *
-     * @param s1
-     * @param s2
+     * @param o1
+     * @param o2
      * @return
      */
     public static boolean equals(Object o1, Object o2) {
@@ -919,7 +919,7 @@ public class Utils {
      * @param top The lowest y value the dna should be drawn at
      * @param bottom The highest y value the dna should be drawn at
      * @param dayXs An array of x values to draw the dna at, one for each day
-     * @param conflictColor the color to use for conflicts
+     * @param context the color to use for conflicts
      * @return
      */
     public static HashMap<Integer, DNAStrand> createDNAStrands(int firstJulianDay,

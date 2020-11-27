@@ -88,11 +88,11 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
     private static final boolean DEBUG = true;
 
-    private static final int TOKEN_EVENT = 1;
-    private static final int TOKEN_ATTENDEES = 1 << 1;
-    private static final int TOKEN_REMINDERS = 1 << 2;
-    private static final int TOKEN_CALENDARS = 1 << 3;
-    private static final int TOKEN_COLORS = 1 << 4;
+    private static final int TOKEN_EVENT = 1;//日程事件
+    private static final int TOKEN_ATTENDEES = 1 << 1;//与会者
+    private static final int TOKEN_REMINDERS = 1 << 2;//提醒
+    private static final int TOKEN_CALENDARS = 1 << 3;//日历
+    private static final int TOKEN_COLORS = 1 << 4;//活动颜色
 
     private static final int TOKEN_ALL = TOKEN_EVENT | TOKEN_ATTENDEES | TOKEN_REMINDERS
             | TOKEN_CALENDARS | TOKEN_COLORS;
@@ -103,7 +103,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
      * yet. Once all queries have returned, the model can be applied to the
      * view.
      */
-    private int mOutstandingQueries = TOKEN_UNITIALIZED;
+    private int mOutstandingQueries = TOKEN_UNITIALIZED;//未完成的查询
 
     EditEventHelper mHelper;
     CalendarEventModel mModel;
@@ -128,15 +128,15 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     private EventColorPickerDialog mColorPickerDialog;
 
     private Activity mActivity;
-    private final Done mOnDone = new Done();
+    private final Done mOnDone = new Done();//编辑完成的Task
 
     private boolean mSaveOnDetach = true;
-    private boolean mIsReadOnly = false;
+    private boolean mIsReadOnly = false;//是否只读
     public boolean mShowModifyDialogOnLaunch = false;
     private boolean mShowColorPalette = false;
 
-    private boolean mTimeSelectedWasStartTime;
-    private boolean mDateSelectedWasStartDate;
+    private boolean mTimeSelectedWasStartTime;//选择的时间是开始时间
+    private boolean mDateSelectedWasStartDate;//所选日期为开始日期
 
     private InputMethodManager mInputMethodManager;
 
@@ -147,6 +147,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     private final View.OnClickListener mActionBarListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Log.d(TAG, "onClick: click ActionBar ... ");
             onActionBarItemSelected(v.getId());
         }
     };
@@ -161,8 +162,8 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         @Override
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
             // If the query didn't return a cursor for some reason return
-            Log.w(TAG, "onQueryComplete:: cookie:" + cookie);
-            Log.w(TAG, "onQueryComplete:: cursor count:" + cursor.getCount());
+            Log.w(TAG, "onQueryComplete:: token:" + token + ",count:" + cursor.getCount() + ",cookie:" + cookie);
+
             if (cursor == null) {
                 return;
             }
@@ -245,6 +246,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                     String[] selArgs = {
                         Long.toString(mModel.mCalendarId)
                     };
+                    //查询日历账户
                     mHandler.startQuery(TOKEN_CALENDARS, null, Calendars.CONTENT_URI,
                             EditEventHelper.CALENDARS_PROJECTION, EditEventHelper.CALENDARS_WHERE,
                             selArgs /* selection args */, null /* sort order */);
@@ -328,12 +330,13 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                     setModelIfDone(TOKEN_REMINDERS);
                     break;
                 case TOKEN_CALENDARS:
+                    Log.d(TAG, "onQueryComplete:: TOKEN_CALENDARS,mModel.mId:" + mModel.mId + ",mCalendarId:" + mCalendarId);
                     try {
                         if (mModel.mId == -1) {
                             // Populate Calendar spinner only if no event id is set.
-                            MatrixCursor matrixCursor = Utils.matrixCursorFromCursor(cursor);
+                            MatrixCursor matrixCursor = Utils.matrixCursorFromCursor(cursor);//查询账户结果列表
                             if (DEBUG) {
-                                Log.d(TAG, "onQueryComplete: setting cursor with "
+                                Log.d(TAG, "onQueryComplete:: setting cursor with "
                                         + matrixCursor.getCount() + " calendars");
                             }
                             mView.setCalendarsCursor(matrixCursor, isAdded() && isResumed(),
@@ -346,11 +349,13 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                     } finally {
                         cursor.close();
                     }
-                    setModelIfDone(TOKEN_CALENDARS);
+                    setModelIfDone(TOKEN_CALENDARS);//设置未完成的查询-已完成日历账户查询
                     break;
                 case TOKEN_COLORS:
+                    Log.d(TAG, "onQueryComplete:: TOKEN_COLORS ...");
                     if (cursor.moveToFirst()) {
                         EventColorCache cache = new EventColorCache();
+                        Log.d(TAG, "onQueryComplete:: cache ...");
                         do
                         {
                             int colorKey = cursor.getInt(EditEventHelper.COLORS_INDEX_COLOR_KEY);
@@ -412,9 +417,16 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         }
     };
 
+    /**
+     * 设置未完成的查询
+     * @param queryType 已经完成的
+     */
     private void setModelIfDone(int queryType) {
         synchronized (this) {
+            Log.d(TAG, "setModelIfDone:: mOutstandingQueries:" + mOutstandingQueries + ",queryType:" + queryType);
             mOutstandingQueries &= ~queryType;
+            Log.d(TAG, "setModelIfDone:: mOutstandingQueries:" + mOutstandingQueries + ",mModel:" + mModel + ",mRestoreModel:" + mRestoreModel + ",mOriginalModel:" + mOriginalModel);
+
             if (mOutstandingQueries == 0) {
                 if (mRestoreModel != null) {
                     mModel = mRestoreModel;
@@ -427,6 +439,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                     }
 
                 }
+                Log.d(TAG, "setModelIfDone:: mModification:" + mModification);
                 mView.setModel(mModel);
                 mView.setModification(mModification);
             }
@@ -440,6 +453,8 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     @SuppressLint("ValidFragment")
     public EditEventFragment(EventInfo event, ArrayList<ReminderEntry> reminders,
                              boolean eventColorInitialized, int eventColor, boolean readOnly, Intent intent) {
+        Log.w(TAG, "EditEventFragment::  mIsReadOnly:"+mIsReadOnly+",eventColorInitialized:"+eventColorInitialized);
+        Log.w(TAG, "EditEventFragment::  mEvent:"+event.toString()+",reminders:"+reminders);
         mEvent = event;
         mIsReadOnly = readOnly;
         mIntent = intent;
@@ -455,6 +470,8 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Log.w(TAG, "onActivityCreated:: ^^_^^ ... ");
+
         mColorPickerDialog = (EventColorPickerDialog) getActivity().getFragmentManager()
                 .findFragmentByTag(COLOR_PICKER_DIALOG_TAG);
         if (mColorPickerDialog != null) {
@@ -522,7 +539,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         } else {
             mOutstandingQueries = TOKEN_CALENDARS | TOKEN_COLORS;
             if (DEBUG) {
-                Log.d(TAG, "startQuery: Editing a new event.");
+                Log.d(TAG, "startQuery: Editing a new event,mOutstandingQueries:" + mOutstandingQueries);
             }
             mModel.mOriginalStart = mBegin;
             mModel.mOriginalEnd = mEnd;
@@ -565,17 +582,19 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
 //        mContext.requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        Log.w(TAG, "onCreateView:: ^^_^^ ... ");
+        Log.w(TAG, "onCreateView:: ^^_^^ ...,mIsReadOnly:" + mIsReadOnly);
         View view;
         if (mIsReadOnly) {
             view = inflater.inflate(R.layout.edit_event_single_column, null);
         } else {
             view = inflater.inflate(R.layout.edit_event, null);
         }
+        Log.d(TAG, "onCreateView:: mTimeSelectedWasStartTime:" + mTimeSelectedWasStartTime + ",mDateSelectedWasStartDate:" + mDateSelectedWasStartDate);
         mView = new EditEventView(mActivity, view, mOnDone, mTimeSelectedWasStartTime,
                 mDateSelectedWasStartDate);
         startQuery();
 
+        //设置保存取消的ActionBar
         if (mUseCustomActionBar) {
             View actionBarButtons = inflater.inflate(R.layout.edit_event_custom_actionbar,
                     new LinearLayout(mActivity), false);
@@ -603,6 +622,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //恢复保存的页面状态信息
         Log.w(TAG, "onCreate:: ^^_^^ ... ,savedInstanceState=" + savedInstanceState);
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(BUNDLE_KEY_MODEL)) {
@@ -662,7 +682,9 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
      * @return whether the event was handled here
      */
     private boolean onActionBarItemSelected(int itemId) {
+        Log.d(TAG, "onActionBarItemSelected::");
         if (itemId == R.id.action_done) {
+            Log.d(TAG, "onActionBarItemSelected:: action_done ... ");
             if (EditEventHelper.canModifyEvent(mModel) || EditEventHelper.canRespond(mModel)) {
                 if (mView != null && mView.prepareForSave()) {
                     if (mModification == Utils.MODIFY_UNINITIALIZED) {
@@ -684,6 +706,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                 mOnDone.run();
             }
         } else if (itemId == R.id.action_cancel) {
+            Log.d(TAG, "onActionBarItemSelected:: action_cancel ... ");
             mOnDone.setDoneCode(Utils.DONE_REVERT);
             mOnDone.run();
         }
@@ -939,12 +962,14 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     @Override
     public void eventsChanged() {
         // TODO Requery to see if event has changed
+        Log.w(TAG, "eventsChanged: ^^_^^ ... ");
     }
 
-    //保存数据
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         Log.w(TAG, "onSaveInstanceState:: ^^_^^ ...,outState:" + outState);
+        //页面不可见,保存页面信息,以便onCreate时好恢复
         mView.prepareForSave();
         outState.putSerializable(BUNDLE_KEY_MODEL, mModel);
         outState.putInt(BUNDLE_KEY_EDIT_STATE, mModification);

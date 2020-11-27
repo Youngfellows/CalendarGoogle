@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:textColor="#333333"
     />
-
+    <!--与calendar_name左边对齐-->
     <TextView
         android:id="@+id/account_name"
         android:layout_width="wrap_content"
