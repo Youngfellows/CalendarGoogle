@@ -257,6 +257,7 @@ public class EditEventHelper {
     }
 
     /**
+     * 保存日程事件
      * Saves the event. Returns true if the event was successfully saved, false
      * otherwise.
      *

@@ -80,19 +80,19 @@ public class Utils {
     public static final long UNDO_DELAY = 0;
 
     // For recurring events which instances of the series are being modified
-    public static final int MODIFY_UNINITIALIZED = 0;
+    public static final int MODIFY_UNINITIALIZED = 0;//为初始化
     public static final int MODIFY_SELECTED = 1;
     public static final int MODIFY_ALL_FOLLOWING = 2;
     public static final int MODIFY_ALL = 3;
 
     // When the edit event view finishes it passes back the appropriate exit
     // code.
-    public static final int DONE_REVERT = 1 << 0;
-    public static final int DONE_SAVE = 1 << 1;
-    public static final int DONE_DELETE = 1 << 2;
+    public static final int DONE_REVERT = 1 << 0;//完成还原,取消
+    public static final int DONE_SAVE = 1 << 1;//完成保存
+    public static final int DONE_DELETE = 1 << 2;//完成删除
     // And should re run with DONE_EXIT if it should also leave the view, just
     // exiting is identical to reverting
-    public static final int DONE_EXIT = 1 << 0;
+    public static final int DONE_EXIT = 1 << 0;//完成推出
 
     public static final String OPEN_EMAIL_MARKER = " <";
     public static final String CLOSE_EMAIL_MARKER = ">";

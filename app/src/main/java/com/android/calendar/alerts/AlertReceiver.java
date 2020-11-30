@@ -16,6 +16,7 @@
 
 package com.android.calendar.alerts;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -152,6 +153,7 @@ public class AlertReceiver extends BroadcastReceiver {
                 context.startActivity(i);
             }
         } else {
+            Log.i(TAG, "onReceive:: action:" + intent.getAction() + ",url:" + intent.getData());
             Intent i = new Intent();
             i.setClass(context, AlertService.class);
             i.putExtras(intent);
@@ -170,6 +172,7 @@ public class AlertReceiver extends BroadcastReceiver {
      * Start the service to process the current event notifications, acquiring
      * the wake lock before returning to ensure that the service will run.
      */
+    @SuppressLint("InvalidWakeLockTag")
     public static void beginStartingService(Context context, Intent intent) {
         synchronized (mStartingServiceSync) {
             if (mStartingService == null) {

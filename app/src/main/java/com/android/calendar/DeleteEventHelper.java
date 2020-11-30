@@ -33,6 +33,7 @@ import android.provider.CalendarContract;
 import android.provider.CalendarContract.Events;
 import android.text.TextUtils;
 import android.text.format.Time;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 
@@ -61,6 +62,7 @@ import java.util.Arrays;
  * {@link #delete()} multiple times).
  */
 public class DeleteEventHelper {
+    private String TAG = this.getClass().getSimpleName();
     private final Activity mParent;
     private Context mContext;
 
@@ -136,6 +138,7 @@ public class DeleteEventHelper {
             deleteStarted();
             long id = mModel.mId; // mCursor.getInt(mEventIndexId);
             Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, id);
+            Log.d(TAG, "onClick:: start delete event ... ,uri:" + uri);
             mService.startDelete(mService.getNextToken(), null, uri, null, null, Utils.UNDO_DELAY);
             if (mCallback != null) {
                 mCallback.run();
@@ -267,6 +270,8 @@ public class DeleteEventHelper {
         String rRule = model.mRrule;
         String originalEvent = model.mOriginalSyncId;
         if (TextUtils.isEmpty(rRule)) {
+            Log.d(TAG, "delete:: show delete event dialog ...");
+
             AlertDialog dialog = new AlertDialog.Builder(mContext)
                     .setMessage(R.string.delete_this_event_title)
                     .setIconAttribute(android.R.attr.alertDialogIcon)

@@ -88,6 +88,7 @@ public class AlertUtils {
         return new AlarmManagerInterface() {
             @Override
             public void set(int type, long triggerAtMillis, PendingIntent operation) {
+                Log.d(TAG, "set:: type:" + type + ",triggerAtMillis:" + triggerAtMillis + ",operation:" + operation);
                 if (Utils.isKeyLimePieOrLater()) {
                     mgr.setExact(type, triggerAtMillis, operation);
                 } else {
@@ -122,6 +123,7 @@ public class AlertUtils {
         scheduleAlarmHelper(context, manager, alarmTime, true);
     }
 
+    //设置提醒时间
     private static void scheduleAlarmHelper(Context context, AlarmManagerInterface manager,
             long alarmTime, boolean quietUpdate) {
         int alarmType = AlarmManager.RTC_WAKEUP;

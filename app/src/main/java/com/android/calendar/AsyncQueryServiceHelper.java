@@ -41,7 +41,7 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
 public class AsyncQueryServiceHelper extends IntentService {
-    private static final String TAG = "AsyncQuery";
+    private static final String TAG = "AsyncQueryServiceHelper";
 
     private static final PriorityQueue<OperationInfo> sWorkQueue =
         new PriorityQueue<OperationInfo>();
@@ -161,8 +161,8 @@ public class AsyncQueryServiceHelper extends IntentService {
         args.calculateScheduledTime();
 
         synchronized (sWorkQueue) {
-            sWorkQueue.add(args);
-            sWorkQueue.notify();
+            sWorkQueue.add(args);//添加到队列
+            sWorkQueue.notify();//更新
         }
 
         context.startService(new Intent(context, AsyncQueryServiceHelper.class));
@@ -265,7 +265,7 @@ public class AsyncQueryServiceHelper extends IntentService {
                     }
                 }
 
-                args = sWorkQueue.poll();
+                args = sWorkQueue.poll();//取出队列中的任务
                 if (args != null) {
                     // Got work to do. Break out of waiting loop
                     break;
@@ -282,6 +282,7 @@ public class AsyncQueryServiceHelper extends IntentService {
 
             switch (args.op) {
                 case Operation.EVENT_ARG_QUERY:
+                    Log.d(TAG, "onHandleIntent:: EVENT_ARG_QUERY ...");
                     Cursor cursor;
                     try {
                         cursor = resolver.query(args.uri, args.projection, args.selection,
@@ -303,15 +304,18 @@ public class AsyncQueryServiceHelper extends IntentService {
                     break;
 
                 case Operation.EVENT_ARG_INSERT:
+                    Log.d(TAG, "onHandleIntent:: EVENT_ARG_INSERT ...");
                     args.result = resolver.insert(args.uri, args.values);
                     break;
 
                 case Operation.EVENT_ARG_UPDATE:
+                    Log.d(TAG, "onHandleIntent:: EVENT_ARG_UPDATE ...");
                     args.result = resolver.update(args.uri, args.values, args.selection,
                             args.selectionArgs);
                     break;
 
                 case Operation.EVENT_ARG_DELETE:
+                    Log.d(TAG, "onHandleIntent:: EVENT_ARG_DELETE ...");
                     try {
                         args.result = resolver.delete(args.uri, args.selection, args.selectionArgs);
                     } catch (IllegalArgumentException e) {
@@ -323,6 +327,7 @@ public class AsyncQueryServiceHelper extends IntentService {
                     break;
 
                 case Operation.EVENT_ARG_BATCH:
+                    Log.d(TAG, "onHandleIntent:: EVENT_ARG_BATCH ...");
                     try {
                         args.result = resolver.applyBatch(args.authority, args.cpo);
                     } catch (RemoteException e) {

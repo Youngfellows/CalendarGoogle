@@ -663,14 +663,14 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         super.onCreateOptionsMenu(menu, inflater);
         Log.w(TAG, "onCreateOptionsMenu:: ^^_^^ ... ");
         if (!mUseCustomActionBar) {
-            inflater.inflate(R.menu.edit_event_title_bar, menu);
+            inflater.inflate(R.menu.edit_event_title_bar, menu);//取消保存的菜单
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.w(TAG, "onOptionsItemSelected:: ^^_^^ ... ");
-        return onActionBarItemSelected(item.getItemId());
+        return onActionBarItemSelected(item.getItemId());//点击取消保存的菜单
     }
 
     /**
@@ -822,12 +822,13 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         public void run() {
             // We only want this to get called once, either because the user
             // pressed back/home or one of the buttons on screen
-            mSaveOnDetach = false;
+            mSaveOnDetach = false;//分离时保存
             if (mModification == Utils.MODIFY_UNINITIALIZED) {
                 // If this is uninitialized the user hit back, the only
                 // changeable item is response to default to all events.
-                mModification = Utils.MODIFY_ALL;
+                mModification = Utils.MODIFY_ALL;//修改
             }
+            Log.d(TAG, "Done run::  mCode:" + mCode + "," +(mCode & Utils.DONE_SAVE));
 
             if ((mCode & Utils.DONE_SAVE) != 0 && mModel != null
                     && (EditEventHelper.canRespond(mModel)

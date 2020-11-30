@@ -91,6 +91,17 @@ public class CalendarEventModel implements Serializable {
             mIdentity = identity;
             mIdNamespace = idNamespace;
         }
+
+        @Override
+        public String toString() {
+            return "Attendee{" +
+                    "mName='" + mName + '\'' +
+                    ", mEmail='" + mEmail + '\'' +
+                    ", mStatus=" + mStatus +
+                    ", mIdentity='" + mIdentity + '\'' +
+                    ", mIdNamespace='" + mIdNamespace + '\'' +
+                    '}';
+        }
     }
 
     /**

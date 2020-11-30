@@ -419,7 +419,7 @@ public class AlertService extends Service {
         // Schedule the next silent refresh time so notifications will change
         // buckets (eg. drop into expired digest, etc).
         if (nextRefreshTime < Long.MAX_VALUE && nextRefreshTime > currentTime) {
-            AlertUtils.scheduleNextNotificationRefresh(context, alarmMgr, nextRefreshTime);
+            AlertUtils.scheduleNextNotificationRefresh(context, alarmMgr, nextRefreshTime);//设置下一个提醒时间
             if (DEBUG) {
                 long minutesBeforeRefresh = (nextRefreshTime - currentTime) / MINUTE_MS;
                 Time time = new Time();
@@ -1098,6 +1098,7 @@ public class AlertService extends Service {
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "onCreate:: ... ");
         HandlerThread thread = new HandlerThread("AlertService",
                 Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
@@ -1111,6 +1112,7 @@ public class AlertService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand:: ");
         if (intent != null) {
             Message msg = mServiceHandler.obtainMessage();
             msg.arg1 = startId;
